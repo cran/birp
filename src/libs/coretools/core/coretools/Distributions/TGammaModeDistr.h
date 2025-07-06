@@ -38,8 +38,8 @@ public:
 
 	// static function for external use
 	static void alphaBetaWarning(double alpha, double beta) {
-		if (alpha <= 0.0) UERROR("Provided mode and variance imply a shape parameter alpha <= 0.0!");
-		if (beta <= 0.0) UERROR("Provided mode and variance imply a rate parameter beta <= 0.0!");
+		DEV_ASSERT(alpha > 0.);
+		DEV_ASSERT(beta > 0.);
 	}
 
 	static Positive density(StrictlyPositive x, StrictlyPositive mode, StrictlyPositive var) noexcept {

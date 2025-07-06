@@ -20,14 +20,14 @@ class TStdWriter final : public TWriter {
 	std::FILE *_file;
 
 	void _write(const void *buffer, size_t size, size_t count) override {
-		if (std::fwrite(buffer, size, count, _file) == 0) { DEVERROR("Was not able to write to file", name(), "!"); }
+		if (std::fwrite(buffer, size, count, _file) == 0) { throw TDevError("Was not able to write to file", name(), "!"); }
 	};
 	int64_t _tell() const override { return std::ftell(_file); };
 
 public:
 	TStdWriter(std::string_view Filename, const char *Mode = "w")
 		: TWriter(Filename), _file(std::fopen(name().c_str(), Mode)) {
-		if (!_file) { UERROR("Was not able to create file ", name(), ". Does the path exist?"); }
+		user_assert(_file, "Was not able to create file ", name(), ". Does the path exist?");
 	}
 	~TStdWriter() { std::fclose(_file); }
 

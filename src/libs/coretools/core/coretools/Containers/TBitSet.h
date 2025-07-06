@@ -8,10 +8,9 @@
 #ifndef TSTRONGBITSET_H_
 #define TSTRONGBITSET_H_
 
-#include <cassert>
-
 #include "coretools/Containers/TStrongArray.h"
 #include "coretools/traits.h"
+#include "coretools/Main/TError.h"
 
 namespace coretools {
 
@@ -26,13 +25,13 @@ private:
 		return a;
 	}
 
-	uintN_t _data                                                  = 0;
+	uintN_t _data                                                           = 0;
 	static constexpr TStrongArray<SmallestInteger_t<N>, Index, N> _bitmasks = _getBitmasks();
 
 public:
 	constexpr TStrongBitSet() = default;
-	constexpr explicit TStrongBitSet(uintN_t in) noexcept : _data(in) {
-		if constexpr (N < 8 * sizeof(uintN_t)) assert(in < (1u << N));
+	constexpr explicit TStrongBitSet(uintN_t in) noexcept(noDebug) : _data(in) {
+		if constexpr (N < 8 * sizeof(uintN_t)) DEBUG_ASSERT(in < (1u << N));
 	}
 
 	constexpr void reset() noexcept { _data = 0; }
@@ -52,22 +51,21 @@ public:
 
 	template<Index i> constexpr void set(bool b) noexcept {
 		static_assert(index(i) < N);
-		constexpr auto bitmask  = _bitmasks[i];
+		constexpr auto bitmask = _bitmasks[i];
 		if (b) {
 			_data |= bitmask;
-		}
-		else {
+		} else {
 			constexpr auto nbitmask = ~bitmask;
 			_data &= nbitmask;
 		}
 	}
 
-	constexpr bool operator[](Index i) const noexcept {
-		assert(index(i) < N);
+	constexpr bool operator[](Index i) const noexcept(noDebug) {
+		DEBUG_ASSERT(index(i) < N);
 		return (_data & _bitmasks[i]) != 0;
 	}
 
-	constexpr auto operator[](Index i) noexcept {
+	constexpr auto operator[](Index i) noexcept(noDebug) {
 		class Voldemort { // This type cannot be named
 		private:
 			uintN_t &_data;
@@ -86,11 +84,13 @@ public:
 			constexpr operator bool() const noexcept { return (_data & _bitmask) != 0; }
 			constexpr bool operator~() const noexcept { return (_data & _bitmask) == 0; }
 		};
-		assert(index(i) < N);
+		DEBUG_ASSERT(index(i) < N);
 		return Voldemort(_data, _bitmasks[i]);
 	}
 
-	friend bool operator==(const TStrongBitSet<Index, N> &lhs, const TStrongBitSet<Index, N> &rhs) { return lhs._data == rhs._data; }
+	friend bool operator==(const TStrongBitSet<Index, N> &lhs, const TStrongBitSet<Index, N> &rhs) {
+		return lhs._data == rhs._data;
+	}
 };
 
 template<size_t N> using TBitSet = TStrongBitSet<size_t, N>;

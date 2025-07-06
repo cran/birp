@@ -123,7 +123,7 @@ template<typename PrecisionType, typename NumStatesType>
 const arma::mat &TTransitionMatrixDistBase<PrecisionType, NumStatesType>::getUnparametrizedGeneratingMatrix() const {
 	// needed for Newton-Raphson
 	// overridden in derived classes if there is indeed an unparametrized generating matrix available
-	DEVERROR("Class TTransitionMatrixDistBase does not manage a generating matrix!");
+	throw coretools::TDevError("Class TTransitionMatrixDistBase does not manage a generating matrix!");
 }
 
 template<typename PrecisionType, typename NumStatesType>
@@ -150,7 +150,7 @@ TTransitionMatrixBool<PrecisionType, NumStatesType>::TTransitionMatrixBool(NumSt
 
 template<typename PrecisionType, typename NumStatesType>
 void TTransitionMatrixBool<PrecisionType, NumStatesType>::resize(NumStatesType NumStates) {
-	if (NumStates != 2) { DEVERROR("Transition matrix for booleans can only have 2 states (not ", NumStates, ")!"); }
+	if (NumStates != 2) { throw coretools::TDevError("Transition matrix for booleans can only have 2 states (not ", NumStates, ")!"); }
 	TTransitionMatrixDistBase<PrecisionType, NumStatesType>::resize(NumStates);
 }
 
@@ -269,7 +269,7 @@ TTransitionMatrixCategorical<PrecisionType, NumStatesType>::TTransitionMatrixCat
 
 template<typename PrecisionType, typename NumStatesType>
 void TTransitionMatrixCategorical<PrecisionType, NumStatesType>::resize(NumStatesType NumStates) {
-	if (NumStates < 2) { DEVERROR("Transition matrix must have at least two 2 states (not ", NumStates, ")!"); }
+	if (NumStates < 2) { throw coretools::TDevError("Transition matrix must have at least two 2 states (not ", NumStates, ")!"); }
 	_D = NumStates - 1;
 	TTransitionMatrixDistBase<PrecisionType, NumStatesType>::resize(NumStates);
 }
@@ -433,7 +433,7 @@ TTransitionMatrixBoolGeneratingMatrix<PrecisionType, NumStatesType>::TTransition
 
 template<typename PrecisionType, typename NumStatesType>
 void TTransitionMatrixBoolGeneratingMatrix<PrecisionType, NumStatesType>::resize(NumStatesType NumStates) {
-	if (NumStates != 2) { DEVERROR("Transition matrix for booleans can only have 2 states (not ", NumStates, ")!"); }
+	if (NumStates != 2) { throw coretools::TDevError("Transition matrix for booleans can only have 2 states (not ", NumStates, ")!"); }
 	TTransitionMatrixDistBase<PrecisionType, NumStatesType>::resize(NumStates);
 }
 
@@ -538,7 +538,7 @@ TTransitionMatrixLadder<PrecisionType, NumStatesType>::TTransitionMatrixLadder(N
 template<typename PrecisionType, typename NumStatesType>
 void TTransitionMatrixLadder<PrecisionType, NumStatesType>::resize(NumStatesType NumStates) {
 	if (NumStates < 2) {
-		DEVERROR("Transition matrix for "
+		throw coretools::TDevError("Transition matrix for "
 				 "ladder-type transition matrix must have at least 2 states (not ",
 				 NumStates, ")!");
 	}

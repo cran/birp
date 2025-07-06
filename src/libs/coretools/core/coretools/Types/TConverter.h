@@ -15,6 +15,8 @@ template<ProbabilityType From> struct TConverter {};
 
 template<> struct TConverter<ProbabilityType::linear> {
 	using value_type = double;
+	static constexpr auto min = value_type{};
+	static constexpr auto max = 1.;
 
 	template<ProbabilityType From, typename T> static value_type from(T t) noexcept {
 		if constexpr (From == ProbabilityType::linear) return t;
@@ -33,6 +35,8 @@ template<> struct TConverter<ProbabilityType::linear> {
 
 template<> struct TConverter<ProbabilityType::log> {
 	using value_type = double;
+	static constexpr auto min = std::numeric_limits<value_type>::lowest();
+	static constexpr auto max = value_type{};
 
 	template<ProbabilityType From, typename T> static value_type from(T t) noexcept {
 		if constexpr (From == ProbabilityType::linear) return std::log(t);
@@ -49,6 +53,8 @@ template<> struct TConverter<ProbabilityType::log> {
 
 template<> struct TConverter<ProbabilityType::log10> {
 	using value_type = double;
+	static constexpr auto min = std::numeric_limits<value_type>::lowest();
+	static constexpr auto max = value_type{};
 
 	template<ProbabilityType From, typename T> value_type static from(T t) noexcept {
 		if constexpr (From == ProbabilityType::linear) return std::log10(t);
@@ -66,25 +72,28 @@ template<> struct TConverter<ProbabilityType::log10> {
 template<> struct TConverter<ProbabilityType::phred> {
 	// phreded probability = -10 * log_10(probability)
 	using value_type = uint8_t;
+	static constexpr auto min = value_type{};
+	static constexpr auto max = std::numeric_limits<value_type>::max();
 
 	template<ProbabilityType From, typename T> value_type static from(T t) noexcept {
+
 		if constexpr (From == ProbabilityType::linear) {
 			const double ph = -10 * std::log10(t);
-			if (ph > std::numeric_limits<value_type>::max()) return std::numeric_limits<value_type>::max();
+			if (ph > max) return max;
 			return std::roundl(ph);
 		} else if constexpr (From == ProbabilityType::log) {
 			const double ph =  -10 * log10e * t;
-			if (ph > std::numeric_limits<value_type>::max()) return std::numeric_limits<value_type>::max();
+			if (ph > max) return max;
 			return std::roundl(ph);
 		} else if constexpr (From == ProbabilityType::log10) {
 			const double ph =  -10 * t;
-			if (ph > std::numeric_limits<value_type>::max()) return std::numeric_limits<value_type>::max();
+			if (ph > max) return max;
 			return std::roundl(ph);
 		} else if constexpr (From == ProbabilityType::phred) {
 			return t;
 		} else if constexpr (From == ProbabilityType::hpPhred) {
 			const double ph =  t/100;
-			if (ph > std::numeric_limits<value_type>::max()) return std::numeric_limits<value_type>::max();
+			if (ph > max) return max;
 			return std::roundl(ph);
 		} else
 			static_assert(From == ProbabilityType::linear); // will not compile
@@ -94,19 +103,22 @@ template<> struct TConverter<ProbabilityType::phred> {
 template<> struct TConverter<ProbabilityType::hpPhred> {
     // HighPrecisionPhredIntProbability = -1000 * log10(probability)
 	using value_type = uint16_t;
+	static constexpr auto min = value_type{};
+	static constexpr auto max = std::numeric_limits<value_type>::max() - 1; // max is used as tag
 
 	template<ProbabilityType From, typename T> value_type static from(T t) noexcept {
+
 		if constexpr (From == ProbabilityType::linear) {
 			const double ph = -1000 * std::log10(t);
-			if (ph > std::numeric_limits<value_type>::max()) return std::numeric_limits<value_type>::max();
+			if (ph > max) return max;
 			return std::roundl(ph);
 		} else if constexpr (From == ProbabilityType::log) {
 			const double ph =  -1000 * log10e * t;
-			if (ph > std::numeric_limits<value_type>::max()) return std::numeric_limits<value_type>::max();
+			if (ph > max) return max;
 			return std::roundl(ph);
 		} else if constexpr (From == ProbabilityType::log10) {
 			const double ph =  -1000 * t;
-			if (ph > std::numeric_limits<value_type>::max()) return std::numeric_limits<value_type>::max();
+			if (ph > max) return max;
 			return std::roundl(ph);
 		} else if constexpr (From == ProbabilityType::phred) {
 			return t*100;

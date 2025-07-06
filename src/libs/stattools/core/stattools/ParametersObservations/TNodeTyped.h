@@ -132,7 +132,7 @@ public:
 
 	void set(const std::vector<Type> &Container) {
 		if (Container.size() != size()) {
-			DEVERROR("Size of container (", Container.size(), ") does not match size of parameter (", size(), ").");
+			throw coretools::TDevError("Size of container (", Container.size(), ") does not match size of parameter (", size(), ").");
 		}
 		for (size_t i = 0; i < size(); ++i) { set(i, Container[i]); }
 	}

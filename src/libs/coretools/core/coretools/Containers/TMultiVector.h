@@ -36,7 +36,7 @@ public:
 
 	TMultiVector() = default;
 	TMultiVector(size_t NCols) : _nCols(NCols) {
-		if (NCols == 0) DEVERROR("There must be a least one column!");
+		DEV_ASSERT(NCols > 0);
 	}
 	TMultiVector(size_t NRows, size_t NCols) : _nCols(NCols), _data(NRows * NCols) {}
 
@@ -44,12 +44,12 @@ public:
 		_nCols = Outer.front().size();
 		_data.reserve(Outer.size()*nCols());
 		for (const auto& Inner: Outer) {
-			if (Inner.size() != nCols()) DEVERROR("Every row must have the same inner dimension ", nCols(), "!");
+			DEV_ASSERT(Inner.size() == nCols());
 			for (const auto& v: Inner) {
 				_data.push_back(v);
 			}
 		}
-		assert(_data.size() % nCols() == 0);
+		DEBUG_ASSERT(_data.size() % nCols() == 0);
 	}
 
 
@@ -66,16 +66,16 @@ public:
 
 	void reserve(size_t N) {_data.reserve(N*nCols());}
 	void resize(size_t N, Type V = {}) {
-		assert(nCols() > 0);
+		DEV_ASSERT(nCols() > 0);
 		_data.resize(N*_nCols, V);
 	}
 	void reshape(size_t N) {
-		assert(N > 0);
+		DEV_ASSERT(N > 0);
 		_nCols = N;
 		_data.resize(nCols() * nRows()); // this may remove data!
 	}
 	void reshape(size_t NRows, size_t NCols, Type V = {}) {
-		if (NCols == 0) DEVERROR("There must be a least one column!");
+		DEV_ASSERT(NCols != 0);
 		_nCols = NCols;
 		_data.resize(NRows * NCols, V);
 	}
@@ -91,7 +91,7 @@ public:
 	}
 
 	void push_back(TConstView<Type> View) {
-		if (View.size() != nCols()) DEVERROR("Every row must have the same inner dimension ", nCols(), "!");
+		DEV_ASSERT(View.size() == nCols());
 		_incCapacity();
 		if constexpr (std::is_trivially_constructible_v<Type>) {
 			const auto oldSize = _data.size();
@@ -100,30 +100,30 @@ public:
 		} else {
 			std::copy(View.begin(), View.end(), std::back_inserter(_data));
 		}
-		assert(_data.size() % nCols() == 0);
+		DEBUG_ASSERT(_data.size() % nCols() == 0);
 	}
 
 	void push_back(const Type& Value) {
 		_incCapacity();
 		_data.resize(_data.size() + nCols(), Value);
-		assert(_data.size() % nCols() == 0);
+		DEBUG_ASSERT(_data.size() % nCols() == 0);
 	}
 
 	template<typename... Args>
 	void emplace_back(Args&&... args) {
 		_incCapacity();
 		_data.resize(_data.size() + nCols(), Type(std::forward<Args>(args)...));
-		assert(_data.size() % nCols() == 0);
+		DEBUG_ASSERT(_data.size() % nCols() == 0);
 	}
 
 	TView<Type> get(size_t i) noexcept {
-		assert(i < size());
+		DEBUG_ASSERT(i < size());
 		return TView<Type>(_data.data() + i*nCols(), _data.data() + (i+1)*nCols());
 	}
 	TView<Type> operator[](size_t i) noexcept { return get(i); }
 
 	TConstView<Type> get(size_t i) const noexcept {
-		assert(i < size());
+		DEBUG_ASSERT(i < size());
 		return TConstView<Type>(_data.data() + i*nCols(), _data.data() + (i+1)*nCols());
 	}
 	TConstView<Type> operator[](size_t i) const noexcept { return get(i); }

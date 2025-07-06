@@ -6,6 +6,7 @@
 #include "coretools/traits.h"
 #include "coretools/Main/TError.h"
 #include "coretools/Types/TConverter.h"
+#include <cstdint>
 
 namespace coretools {
 
@@ -28,9 +29,7 @@ private:
 
 	constexpr void _check() const noexcept(!checkIntervals()) {
 		if constexpr (checkIntervals()) {
-			if (!_isValid()) {
-				DEVERROR("TLogProbability cannot have value of ", _value, "!");
-			}
+			dev_assert(_isValid(), "TLogProbability cannot have value of ", _value, "!");
 		}
 	}
 
@@ -44,8 +43,7 @@ public:
 
     explicit TSomeProbability(std::string_view Value)
         : _value(str::fromString<value_type, true>(Value)) {
-      if (!_isValid())
-        UERROR(Value, " is outside of TLogProbability range!");
+		user_assert(_isValid(), Value, " is outside of TLogProbability range!");
 	}
 
 	// no operator= for, always explicit! Use P(...) functions
@@ -80,6 +78,54 @@ public:
 		return *this;
 	}
 
+	constexpr void setAsTag(char Tag) noexcept {
+		static_assert(!isPhreded()); // cannot set specific Tag
+
+		if constexpr (isLinear()) {
+			_value = -(Tag + 1);
+		} else {
+			_value = Tag + 1;
+		}
+	}
+
+	constexpr char getAsTag() noexcept(!checkIntervals()) {
+		static_assert(!isPhreded());
+
+		if constexpr (isLinear()) {
+			if (checkIntervals()) {
+				DEV_ASSERT(_value < 0 && _value > -258);
+			}
+			return static_cast<char>(-_value - 1);
+		} else {
+			if (checkIntervals()) {
+				DEV_ASSERT(_value > 0 && _value < 258);
+			}
+			return static_cast<char>(_value - 1);
+		}
+	}
+
+	constexpr void setAsTag() noexcept {
+		static_assert(isTaggable());
+
+		if constexpr (Type == ProbabilityType::hpPhred) {
+			_value = max() + 1;
+		} else {
+			setAsTag(0);
+		}
+	}
+
+	constexpr bool isTag() const noexcept {
+		static_assert(isTaggable());
+		if constexpr (Type == ProbabilityType::hpPhred) {
+			constexpr auto tagValue = static_cast<value_type>(-1);
+			return _value == tagValue;
+		} else if constexpr (isLinear()) {
+			return _value < 0;
+		} else {
+			return _value > 0;
+		}
+	}
+
 	constexpr value_type oddsRatio() const noexcept {
 		static_assert(isLinear());
 		return _value / (1. - _value);
@@ -103,15 +149,16 @@ public:
 		return Type == ProbabilityType::phred || Type == ProbabilityType::hpPhred;
 	}
 
+	static constexpr bool isTaggable() noexcept {
+		return Type != ProbabilityType::phred;
+	}
+
 	static constexpr value_type min() noexcept {
-		if constexpr (isLinear() || isPhreded()) return value_type{};
-		else return std::numeric_limits<value_type>::lowest();
+		return Converter::min;
 	}
 
 	static constexpr value_type max() noexcept {
-		if constexpr (isLinear()) return 1.;
-		else if constexpr (isPhreded()) return std::numeric_limits<value_type>::max();
-		else return 0.;
+		return Converter::max;
 	}
 
 	static constexpr TSomeProbability lowest() noexcept {
@@ -129,6 +176,8 @@ public:
 		else if constexpr (isPhreded()) return intervals::Positive<value_type>();
 		else return intervals::Negative<value_type>();
 	}
+
+	
 };
 
 // Arithmetics: allow only with same type

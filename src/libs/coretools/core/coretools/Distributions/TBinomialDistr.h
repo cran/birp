@@ -42,20 +42,21 @@ public:
 	// static function for external use
 	static Probability density(size_t n, size_t k, Probability p) {
 		// calculates density of a binomial distribution
-		if (k > n) { DEVERROR("n > k in binomial distribution (with n = ", n, ", k = ", k, ")!"); }
+		DEV_ASSERT(k <= n);
 		return P(choose(n, k) * pow(p, (double)k) * pow(1. - p, (double)n - (double)k));
 	}
 
 	static LogProbability logDensity(size_t n, size_t k, Probability p) {
 		// calculates log density of a binomial distribution
-		if (k > n) { DEVERROR("n > k in binomial distribution (with n = ", n, ", k = ", k, ")!"); }
+		DEV_ASSERT(k <= n);
 		return logP(chooseLog(n, k) + (double)k * log(p) + ((double)n - (double)k) * log(1. - p));
 	}
 
 	// as in https://en.wikipedia.org/wiki/Beta_function#Incomplete_beta_function
 	static Probability cumulativeDensity(size_t n, size_t k, Probability p) {
+		DEV_ASSERT(k <= n);
+
 		if (n == k) { return P(1.0); }
-		if (k > n) { DEVERROR("n > k in binomial distribution (with n = ", n, ", k = ", k, ")!"); }
 		return P(1 - TIncompleteBeta::incompleteBeta(k + 1, n - k, p));
 	}
 

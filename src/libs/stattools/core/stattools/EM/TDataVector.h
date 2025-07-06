@@ -488,18 +488,18 @@ public:
 
 	// access as THMMVector
 	TDataVector<PrecisionType, SizeType> previous() const {
-		if (_current == _vec) { DEVERROR("already at beginning!"); }
+		if (_current == _vec) { throw coretools::TDevError("already at beginning!"); }
 		return TDataVector<PrecisionType, SizeType>(_current - _size, _size);
 	}
 
 	TDataVector<PrecisionType, SizeType> current() const {
-		if (_current == _end) { DEVERROR("at end!"); }
+		if (_current == _end) { throw coretools::TDevError("at end!"); }
 		return TDataVector<PrecisionType, SizeType>(_current, _size);
 	}
 
 	TDataVector<PrecisionType, SizeType> next() const {
-		if (_current == _end) { DEVERROR("at end!"); }
-		if (_current + _size == _end) { DEVERROR("at end - _size!"); }
+		if (_current == _end) { throw coretools::TDevError("at end!"); }
+		if (_current + _size == _end) { throw coretools::TDevError("at end - _size!"); }
 		return TDataVector<PrecisionType, SizeType>(_current + _size, _size);
 	}
 

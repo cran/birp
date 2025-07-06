@@ -151,7 +151,8 @@ public:
 	size_t index(std::string_view Key) const {
 		auto it = _mapIt(Key);
 		if (it == _map.end() || it->first != Key)
-			UERROR("File ", name(), " has no column with name '", Key, "'!");
+			throw TUserError("File ", name(), " has no column with name '", Key, "'!");
+
 		return it->second;
 	}
 
@@ -162,14 +163,13 @@ public:
 				return index(Columns[i]);
 			}
 		}
-		UERROR("File ", name(), " has no column with any of the keys ", str::toString(Columns), "!");
+		throw TUserError("File ", name(), " has no column with any of the keys ", str::toString(Columns), "!");
 	}
 
 	// Getters
 	std::string_view get(size_t I) const { //I is relative position as defined in 'Columns'
 		_parseLine();
-		if (I >= _line.size())
-			UERROR("Cannot read column ", I, "' in file ", name(), ", on line ", _curLin, "!");
+		user_assert(I < _line.size(), "Cannot read column ", I, "' in file ", name(), ", on line ", _curLin, "!");
 		return _line[I];
 	}
 

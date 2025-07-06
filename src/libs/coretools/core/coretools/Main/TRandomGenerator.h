@@ -7,6 +7,7 @@
 #include "coretools/Types/commonWeakTypes.h"
 #include "coretools/Types/probability.h"
 #include "coretools/traits.h"
+#include "coretools/enum.h"
 
 #ifdef _OPENMP
 #include "omp.h"
@@ -59,14 +60,14 @@ public:
 
 	// pick one templates
 	template<typename T> T sample(T numElements) {
-		assert(numElements > 0);
+		DEBUG_ASSERT(numElements > 0);
 		return (numElements > 1 ? std::uniform_int_distribution<T>(0, numElements - 1)(_integerGen) : 0);
 	}
 
 	bool pickOneOfTwo(Probability prob = P(0.5)) { return getRand() < prob; }
 
 	template<typename T, typename N> [[deprecated("use TView")]] N pickOne(N numElements, T *probsCumulative) {
-		assert(numElements > 0);
+		DEBUG_ASSERT(numElements > 0);
 		if (numElements == 1) return 0;
 
 		double r = getRandNotOne();
@@ -78,7 +79,7 @@ public:
 	indexType_t<Container> pickOne(const Container &probsCumulative) {
 		using Index = indexType_t<Container>;
 		if constexpr (isResizable_v<Container> || isView_v<Container>) {
-			assert(probsCumulative.size() > 0);
+			DEBUG_ASSERT(probsCumulative.size() > 0);
 			const double r = getRand();
 			return static_cast<Index>(std::distance(
 			    probsCumulative.begin(), std::upper_bound(probsCumulative.begin(), probsCumulative.end(), r)));
@@ -104,7 +105,7 @@ public:
 	}
 
 	template<typename Container> uint32_t pickOneRawProbabilities(const Container &probs) {
-		assert(probs.size() > 0);
+		DEBUG_ASSERT(probs.size() > 0);
 		if (probs.size() == 1) return 0;
 
 		double r    = getRandNotOne();
@@ -228,7 +229,7 @@ public:
 
 	template<typename ContainerIn, typename ContainerOut>
 	void fillDirichletRandom(const ContainerIn &alpha, ContainerOut &res) {
-		assert(alpha.size() > 0);
+		DEBUG_ASSERT(alpha.size() > 0);
 
 		// can not directly fill into res, because type is usually ZeroOneOpen -> violated since normalization happens
 		// only afterwards

@@ -25,7 +25,7 @@ private:
 	bool _minIncluded, _maxIncluded;
 
 	constexpr void _check() {
-		if (_min > _max) { UERROR("Min (", _min, ") > Max (", _max, ")!"); }
+		user_assert(_min <= _max, "Min (", _min, ") > Max (", _max, ")!");
 	};
 
 public:
@@ -66,7 +66,7 @@ public:
 
 		// extract min
 		size_t pos = Range.find_first_of(',');
-		if (pos == std::string::npos) { UERROR("Range does not contain a ','!"); }
+		user_assert(pos != std::string::npos, "Range does not contain a ','!");
 
 		auto minS = str::strip(Range.substr(0, pos));
 		if (minS.length() == 0) {

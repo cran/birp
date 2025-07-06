@@ -49,10 +49,10 @@ public:
 												TDataVector<PrecisionType, NumStatesType> &Emission) const = 0;
 
 	virtual std::vector<PrecisionType> getParameters() const {
-		DEVERROR("This function must be implemented when SQUAREM is used!");
+		throw coretools::TDevError("This function must be implemented when SQUAREM is used!");
 	};
 	virtual bool setParameters(coretools::TConstView<PrecisionType> /*Params*/) {
-		DEVERROR("This function must be implemented when SQUAREM is used!");
+		throw coretools::TDevError("This function must be implemented when SQUAREM is used!");
 	}
 
 	// EM initialization

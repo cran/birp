@@ -368,11 +368,11 @@ private:
 
 	void _checkSizeMinMax(size_t Size) {
 		if (!_hasDefaultMin && Size != _minValues.size()) {
-			DEVERROR("Size of minimal values (", _minValues.size(), ") does not match size of parameters (", Size,
+			throw coretools::TDevError("Size of minimal values (", _minValues.size(), ") does not match size of parameters (", Size,
 					 ")!");
 		}
 		if (!_hasDefaultMax && Size != _maxValues.size()) {
-			DEVERROR("Size of maximal values (", _maxValues.size(), ") does not match size of parameters (", Size,
+			throw coretools::TDevError("Size of maximal values (", _maxValues.size(), ") does not match size of parameters (", Size,
 					 ")!");
 		}
 	}
@@ -895,7 +895,7 @@ public:
 			xh[j]           = temp + h; // trick to reduce finite-precision error
 			h               = xh[j] - temp;
 			auto [f, valid] = _function(xh, Iteration);
-			if (!valid) { DEVERROR("Invalid parameter values used to calculate approximateJacobian!"); }
+			if (!valid) { throw coretools::TDevError("Invalid parameter values used to calculate approximateJacobian!"); }
 			xh[j] = temp;
 			for (size_t i = 0; i < n; i++) { // forward difference formula
 				jacobian(i, j) = (f[i] - ValuesF[i]) / h;

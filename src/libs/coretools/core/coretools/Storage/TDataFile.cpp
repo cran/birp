@@ -24,7 +24,7 @@ void TDataFileBase::_checkDelimiters() {
 	// check input vector of delimiters:
 	// 1) size of delimiters must match the number of dimensions
 	if (_delimiters.size() != _dimensionsVec.size()) {
-		DEVERROR("Error while writing file '", _filename, "'. Size of vector with delimiters (", _delimiters.size(),
+		throw TDevError("Error while writing file '", _filename, "'. Size of vector with delimiters (", _delimiters.size(),
 		         ") does not match the number of dimension of storage (", _dimensionsVec.size(), ").");
 	}
 
@@ -33,7 +33,7 @@ void TDataFileBase::_checkDelimiters() {
 	std::set<char> usedDelims = {_delimiters[0]};
 	for (size_t d = 1; d < _dimensionsVec.size(); d++) {
 		if (_delimiters[d] != _delimiters[d - 1] && usedDelims.find(_delimiters[d]) != usedDelims.end()) {
-			DEVERROR("Error while writing file '", _filename, "'. Delimiter of dimension ", d, "(", _delimiters[d],
+			throw TDevError("Error while writing file '", _filename, "'. Delimiter of dimension ", d, "(", _delimiters[d],
 			         ") is not the same as the delimiter of the previous dimension, but has been used for another "
 			         "dimension! This is currently not allowed.");
 		}
@@ -43,7 +43,7 @@ void TDataFileBase::_checkDelimiters() {
 	// 3) only first delimiter(s) are allowed to be \n. As soon a non-\n delimiter is used, we can't use \n anymore
 	for (size_t d = 1; d < _dimensionsVec.size(); d++) {
 		if (_delimiters[d - 1] != '\n' && _delimiters[d] == '\n') {
-			DEVERROR("Error while writing file '", _filename, "'. Delimiter of dimension ", d, "(", _delimiters[d],
+			throw TDevError("Error while writing file '", _filename, "'. Delimiter of dimension ", d, "(", _delimiters[d],
 			         ") is not allowed to be a newline (\\n), if the delimiter of the previous dimension is not a "
 			         "newline, too!");
 		}

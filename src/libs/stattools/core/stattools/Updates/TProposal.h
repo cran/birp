@@ -88,7 +88,7 @@ public:
 	virtual UnderlyingType adjustPropKernelIfTooBig(UnderlyingType ProposalWidth, std::string_view Name) {
 		if constexpr (!std::is_same_v<UnderlyingType, bool>) {
 			if (ProposalWidth < 0) {
-				UERROR("Proposal width (", ProposalWidth, ") for parameter '", Name, "' is negative!");
+				throw coretools::TUserError("Proposal width (", ProposalWidth, ") for parameter '", Name, "' is negative!");
 			}
 		}
 

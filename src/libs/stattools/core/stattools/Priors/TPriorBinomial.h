@@ -44,10 +44,10 @@ protected:
 		// or 2-dimensional, where the number of columns is 2 (n and k)
 		for (const auto &storage : this->_storageBelow) {
 			if (storage->numDim() == 1 && storage->size() != 2) {
-				DEVERROR("Parameter with 1 dimension must have a total size of 2 (not", storage->size(),
+				throw coretools::TDevError("Parameter with 1 dimension must have a total size of 2 (not", storage->size(),
 						 "), where the first element is n and the second element is k!");
 			} else if (storage->numDim() == 2 && storage->dimensions()[1] != 2) {
-				DEVERROR("Parameter with 2 dimensions must have exactly 2 columns (not", storage->dimensions()[1],
+				throw coretools::TDevError("Parameter with 2 dimensions must have exactly 2 columns (not", storage->dimensions()[1],
 						 "), where the first element is n and the second element is k!");
 			}
 		}
@@ -143,7 +143,7 @@ public:
 
 	void setFixedPriorParameters(std::string_view Params) override {
 		if (!Params.empty()) {
-			UERROR("Can not set prior parameter values for ", this->name(), " distribution: they are inferred.");
+			throw coretools::TUserError("Can not set prior parameter values for ", this->name(), " distribution: they are inferred.");
 		}
 	}
 

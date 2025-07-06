@@ -22,7 +22,7 @@ bool TTest::runMain(std::string_view task) {
 	instances::parameters().add("task", task);
 	instances::parameters().add("verbose", "");
 
-	if (!taskList) UERROR("taskList was not initialized!");
+	user_assert(taskList, "taskList was not initialized!");
 
 	// open task switcher and run task
 	bool returnVal = true;

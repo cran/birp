@@ -86,12 +86,34 @@ if(R_EXECUTABLE)
     execute_process(COMMAND ${R_EXECUTABLE} RHOME
             OUTPUT_VARIABLE R_ROOT_DIR
             OUTPUT_STRIP_TRAILING_WHITESPACE)
+    message(STATUS "Using R_ROOT_DIR: ${R_ROOT_DIR}")
+
+    # Debugging only: Print all subdirectories
+    file(GLOB subdirectories LIST_DIRECTORIES true "${R_ROOT_DIR}/*")
+    foreach(subdir ${subdirectories})
+        message(STATUS "Subdirectory of R_ROOT_DIR: ${subdir}")
+    endforeach()
 
     find_path(R_INCLUDE_DIR R.h
             HINTS ${R_ROOT_DIR}
-            PATHS /usr/local/lib /usr/local/lib64 /usr/share
-            PATH_SUFFIXES include R/include
+            PATHS /usr/local/lib /usr/local/lib64 /usr/share /usr/include /usr/local/include
+            PATH_SUFFIXES include R/include include/R
             DOC "Path to file R.h")
+
+    # Fallback if R_INCLUDE_DIR was not found: ask R directly
+    if(NOT R_INCLUDE_DIR)
+        message(STATUS "R_INCLUDE_DIR not found using find_path, trying R CMD config --cppflags")
+
+        execute_process(
+                COMMAND ${R_EXECUTABLE} CMD config --cppflags
+                OUTPUT_VARIABLE R_CPPFLAGS
+                OUTPUT_STRIP_TRAILING_WHITESPACE)
+
+        string(REGEX MATCH "-I([^ ]+)" _match "${R_CPPFLAGS}")
+        set(R_INCLUDE_DIR "${CMAKE_MATCH_1}")
+
+        message(STATUS "Fallback R_INCLUDE_DIR: ${R_INCLUDE_DIR}")
+    endif()
 
     find_library(R_LIBRARY R
             HINTS ${R_ROOT_DIR}/lib
@@ -132,6 +154,12 @@ foreach(_cpt ${R_FIND_COMPONENTS})
     endif()
 
 endforeach()
+
+# Write variables to log
+message(STATUS "Using R_EXECUTABLE: ${R_EXECUTABLE}")
+message(STATUS "Using R_INCLUDE_DIR: ${R_INCLUDE_DIR}")
+message(STATUS "Using R_INCLUDE_DIRS: ${R_INCLUDE_DIRS}")
+message(STATUS "Using R_LIBRARY: ${R_LIBRARY}")
 
 # Handle the QUIETLY and REQUIRED arguments and set R_FOUND to TRUE if all listed variables are TRUE
 include(FindPackageHandleStandardArgs)

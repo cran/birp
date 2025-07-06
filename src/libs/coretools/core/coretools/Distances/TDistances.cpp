@@ -4,6 +4,7 @@
 
 #include "coretools/Distances/TDistances.h"
 #include "coretools/Files/TOutputFile.h"
+#include "coretools/Main/TError.h"
 #include "coretools/algorithms.h"
 
 namespace coretools {
@@ -66,17 +67,17 @@ size_t TPositionsRaw::size() const { return _positions.size(); }
 size_t TPositionsRaw::numChunks() const { return _chunkNames.size(); }
 
 const std::string &TPositionsRaw::getChunkName(size_t Index) const {
-	assert(Index < _positions.size());
+	DEBUG_ASSERT(Index < _positions.size());
 	// which interval of chunkEnds contains this index?
 	for (size_t j = 0; j < _chunkEnds.size(); j++) {
 		if (Index < _chunkEnds[j]) { return _chunkNames[j]; }
 	}
 	// should never get here
-	DEVERROR("Should never get here - did not find chunk name for index ", Index, "!");
+	throw TDevError("Should never get here - did not find chunk name for index ", Index, "!");
 }
 
 size_t TPositionsRaw::getPosition(size_t Index) const {
-	assert(Index < _positions.size());
+	DEBUG_ASSERT(Index < _positions.size());
 	return _positions[Index];
 }
 
@@ -239,12 +240,12 @@ size_t TPositionsRaw::getIndex(uint32_t Pos, std::string_view Chunk) const {
 	if (_found) {
 		// security check: someone might forget to use exists() and getIndex() right after each other
 		if (_positions[_indexCurrentlyVisitedPosition] != Pos || _chunkNames[_indexCurrentlyVisitedChunk] != Chunk) {
-			DEVERROR("Position ", Pos, " on chunk ", Chunk,
+			throw TDevError("Position ", Pos, " on chunk ", Chunk,
 			         " is different than expected from lookup! Did you use getIndex() right after calling exists()?");
 		}
 		return _indexCurrentlyVisitedPosition;
 	} else {
-		DEVERROR("Position ", Pos, " on chunk ", Chunk,
+		throw TDevError("Position ", Pos, " on chunk ", Chunk,
 		         " does not exist in TPositionsRaw! Always check first with exist() whether or not name class exists.");
 	}
 }

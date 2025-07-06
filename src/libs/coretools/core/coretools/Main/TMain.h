@@ -316,8 +316,13 @@ public:
 				parameters().add(key, value);
 			}
 			_run();
-		} catch (err::TUserError &error) { // user error
-			logfile().error(error.what());
+		} catch (err::TError &error) { // user error
+			if (error.isDevError() || parameters().exists("writeUserErrorLocation")) {
+				logfile().error(error.location(), ": ", error.what());
+			} else {
+				logfile().error(error.what());
+			}
+			if (error.isDevError()) _handleDeveloperError(error.what());
 			_hadErrors = true;
 		} catch (std::string &error) { // user error -> deprecated, use macro UERROR instead!
 			logfile().error(error);
@@ -355,8 +360,13 @@ public:
 			// read parameters from the command line
 			parameters().init(argc, argv);
 			_run();
-		} catch (err::TUserError &error) { // user error
-			logfile().error(error.what());
+		} catch (err::TError &error) { // user error
+			if (error.isDevError() || parameters().exists("writeUserErrorLocation")) {
+				logfile().error(error.location(), ": ", error.what());
+			} else {
+				logfile().error(error.what());
+			}
+			if (error.isDevError()) _handleDeveloperError(error.what());
 			_hadErrors = true;
 		} catch (std::string &error) { // user error -> deprecated, use macro UERROR instead!
 			logfile().error(error);

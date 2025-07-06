@@ -14,6 +14,7 @@
 #include "coretools/Main/TLog.h"
 #include "coretools/Main/TParameters.h"
 #include "coretools/Main/TTask.h"
+#include "coretools/Main/TError.h"
 
 namespace coretools {
 
@@ -54,7 +55,7 @@ public:
 	}
 
 	void addGroupedTask(std::string_view Group, std::string_view Name, TTask *Task) {
-		assert(_groups.size() == _regularTasks.size());
+		DEBUG_ASSERT(_groups.size() == _regularTasks.size());
 		auto p         = _allTasks.emplace(Name, Task);
 		const size_t i = std::distance(_groups.begin(), std::find(_groups.begin(), _groups.end(), Group));
 		if (i == _groups.size()) {
@@ -89,7 +90,7 @@ public:
 	}
 
 	void printAvailableTasks() const {
-		assert(_groups.size() == _regularTasks.size());
+		DEBUG_ASSERT(_groups.size() == _regularTasks.size());
 		using instances::logfile;
 
 		size_t maxLen = 0;

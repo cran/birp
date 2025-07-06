@@ -87,7 +87,8 @@ public:
 	TLineReader(std::string_view Filename) : _reader(makeReader(Filename)) {}
 
 	void open(TReader *reader) {
-		if (isOpen()) UERROR("File '", reader->name(), "' is already open!");
+		user_assert(!isOpen(), "File '", reader->name(), "' is already open!");
+
 		_reader.reset(reader);
 		_pos     = 0;
 		_hasLine = false;
@@ -128,7 +129,8 @@ public:
 	const std::string &name() const noexcept { return _reader->name(); }
 
 	void setPosition(size_t pos) {
-		_hasLine = false;
+		_hasLine            = false;
+		_len                = 0;
 		const size_t maxPos = _reader->tell();
 		const size_t minPos = maxPos - _size;
 		_pos = pos - minPos; // underflow -> big number

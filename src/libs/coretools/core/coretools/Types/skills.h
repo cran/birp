@@ -52,10 +52,8 @@ public:
 	template<typename ValueType> constexpr static void check_u_int(ValueType const &First, ValueType const &Second) {
 		// additional check for uint types: check before doing multiplication, as afterwards it might be too late
 		constexpr auto nmMax = std::numeric_limits<ValueType>::max();
-		if (nmMax - First < Second) {
-			DEVERROR("Addition of unsigned integers ", First, " + ", Second,
-			         " would result in a value larger than the numeric maximum of that type (", nmMax, ")!");
-		}
+		dev_assert(Second <= nmMax - First, "Addition of unsigned integers ", First, " + ", Second,
+				   " would result in a value larger than the numeric maximum of that type (", nmMax, ")!");
 	}
 };
 
@@ -108,9 +106,7 @@ public:
 
 	template<typename ValueType> constexpr static void check_u_int(ValueType const &First, ValueType const &Second) {
 		// additional check for uint types: check before doing subtraction, as afterwards it might be too late
-		if (First < Second) {
-			DEVERROR("Subtraction of unsigned integers ", First, " - ", Second, " would result in a negative value!");
-		}
+		dev_assert(Second <= First, "Subtraction of unsigned integers ", First, " - ", Second, " would result in a negative value!");
 	}
 };
 
@@ -162,10 +158,8 @@ public:
 	template<typename ValueType> constexpr static void check_u_int(ValueType const &First, ValueType const &Second) {
 		// additional check for uint types: check before doing multiplication, as afterwards it might be too late
 		constexpr auto nmMax = std::numeric_limits<ValueType>::max();
-		if (nmMax / First < Second) {
-			DEVERROR("Multiplication of unsigned integers ", First, " * ", Second,
-			         " would result in a value larger than the numeric maximum of that type (", nmMax, ")!");
-		}
+		dev_assert(Second <= nmMax / First, "Multiplication of unsigned integers ", First, " * ", Second,
+				   " would result in a value larger than the numeric maximum of that type (", nmMax, ")!");
 	}
 };
 

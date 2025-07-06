@@ -185,7 +185,7 @@ public:
 
 	void initialize(size_t maxDist) override {
 		// initialize _distanceGroups
-		if (maxDist < 1) DEVERROR("maxDist (", maxDist, ") must be > 0!");
+		DEV_ASSERT(maxDist > 0);
 
 		_numDistanceGroups = static_cast<NumDistanceGroupsType>(
 		    ceil(log2(maxDist)) + 1); // one extra for beginning of chromosome (and last in genome)
@@ -218,14 +218,12 @@ public:
 	size_t numDistanceGroups() const override { return _numDistanceGroups; }
 
 	TDistanceGroup distanceGroup(size_t Group) const override {
-		if (Group >= _numDistanceGroups)
-			DEVERROR("group (", Group, ") is >= than _numDistanceGroups (", _numDistanceGroups, ")!");
+		DEV_ASSERT(Group < _numDistanceGroups);
 		return _distanceGroups[Group];
 	}
 
 	bool groupHasSites(size_t Group) override {
-		if (Group >= _numDistanceGroups)
-			DEVERROR("group (", Group, ") is >= than _numDistanceGroups (", _numDistanceGroups, ")!");
+		DEV_ASSERT(Group < _numDistanceGroups);
 		return _distanceGroups[Group].hasSites;
 	}
 

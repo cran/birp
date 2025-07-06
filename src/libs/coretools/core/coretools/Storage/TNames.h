@@ -30,8 +30,6 @@ protected:
 	size_t _indexVisited; // which index did we visit last?
 	bool _storesNonDefaultNames;
 
-	void _checkSizeNameVec(const std::vector<std::string> &Name, std::string_view ClassNameForError) const;
-
 	std::string _extractFromStringAndReturnString(std::string &String, char DelimiterLast, bool ThrowIfEmpty) const;
 	std::vector<std::string> _extractFromStringAndReturnVec(std::string &String, char DelimiterLast,
 	                                                        bool ThrowIfEmpty) const;

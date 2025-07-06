@@ -20,7 +20,7 @@ class TGzWriter final : public TWriter {
 	gzFile _file;
 
 	void _write(const void *buffer, size_t size, size_t count) override {
-		if (gzwrite(_file, buffer, size * count) == 0) { DEVERROR("Was not able to write to gz file!"); };
+		if (gzwrite(_file, buffer, size * count) == 0) { throw TDevError("Was not able to write to gz file!"); };
 	};
 
 	int64_t _tell() const override { return gztell(_file); };
@@ -28,7 +28,7 @@ class TGzWriter final : public TWriter {
 public:
 	TGzWriter(std::string_view Filename, const char *Mode = "w")
 		: TWriter(Filename), _file(gzopen(name().c_str(), Mode)) {
-		if (!_file) { UERROR("Was not able to create file ", name(), ". Does the path exist?"); }
+		user_assert(_file, "Was not able to create file ", name(), ". Does the path exist?");
 	}
 	~TGzWriter() { gzclose(_file); }
 

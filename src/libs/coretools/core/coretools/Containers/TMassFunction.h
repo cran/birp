@@ -15,6 +15,7 @@
 #include "coretools/Containers/CTFraction.h"
 #include "coretools/Containers/TStrongArray.h"
 #include "coretools/traits.h"
+#include "coretools/Main/TError.h"
 
 namespace coretools {
 
@@ -90,8 +91,8 @@ public:
 
 	template<typename Container1, typename Container2, typename BinaryOperation>
 	static constexpr TStrongMassFunction normalize(const Container1 &x, const Container2 &y, BinaryOperation op) {
-		assert(x.size() == N);
-		assert(y.size() == N);
+		DEBUG_ASSERT(x.size() == N);
+		DEBUG_ASSERT(y.size() == N);
 		TStrongMassFunction mf;
 		std::transform(x.cbegin(), x.cend(), y.cbegin(), mf._data.begin(), op);
 		mf._scale();

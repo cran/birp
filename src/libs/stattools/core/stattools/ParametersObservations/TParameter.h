@@ -117,7 +117,7 @@ protected:
 		if (_def.writesFile(MCMCFiles::statePosteriors) || _def.writesFile(MCMCFiles::posteriorMode)) {
 			assert(_writeStatePos());
 			if (Type::max() > std::numeric_limits<uint8_t>::max() - 1) {
-				DEVERROR("Parameter", this->name(), " max (", Type::max(),
+				throw coretools::TDevError("Parameter", this->name(), " max (", Type::max(),
 				         ") is larger than the maximal value of uint8_t-1 that is used to count the state posteriors.");
 			}
 			_counts.assign(_storage.size(), coretools::TCountDistribution<uint8_t, uint32_t, false>(
@@ -149,13 +149,13 @@ protected:
 				              TypesAreNegative<Type>()) {
 					return std::make_unique<TPropKernelScalingLogNormal<Type, UnderlyingType>>();
 				} else {
-					DEVERROR("Can not initialize parameter '", this->name(), "': Proposal kernel '",
+					throw coretools::TDevError("Can not initialize parameter '", this->name(), "': Proposal kernel '",
 					         ProposalKernel::proposalKernelToString(_def.propKernel()),
 					         "' is only applicable to positive or negative types!");
 				}
 			} else {
 				// none of the proposal kernels matches -> throw
-				DEVERROR("Can not initialize parameter '", this->name(), "': Proposal kernel distribution with name '",
+				throw coretools::TDevError("Can not initialize parameter '", this->name(), "': Proposal kernel distribution with name '",
 				         ProposalKernel::proposalKernelToString(_def.propKernel()), "' does not exist!");
 			}
 		}
@@ -453,13 +453,13 @@ protected:
 	}
 
 	[[nodiscard]] size_t _getModeFromCounts(size_t i) const {
-		if (_counts.empty()) { DEVERROR("Counts were not stored for parameter ", this->name(), "!"); }
+		if (_counts.empty()) { throw coretools::TDevError("Counts were not stored for parameter ", this->name(), "!"); }
 		if (_counts[i].counts() == 0) { return (Type)_storage[i]; } // has never been updated
 		return _counts[i].mode();
 	}
 
 	template<typename IndexType = size_t> const coretools::TMeanVar<double> &_getMeanVar(IndexType i) const {
-		if (_meanVar.empty()) { DEVERROR("Mean and var were not stored for parameter ", this->name(), "!"); }
+		if (_meanVar.empty()) { throw coretools::TDevError("Mean and var were not stored for parameter ", this->name(), "!"); }
 		size_t ix = this->getIndex(i);
 		return _meanVar[ix];
 	}
@@ -731,7 +731,7 @@ public:
 				return sum;
 			}
 		} else {
-			DEVERROR("Function 'calculateLLRatio' for parameter ", this->name(), " is required but not implemented!");
+			throw coretools::TDevError("Function 'calculateLLRatio' for parameter ", this->name(), " is required but not implemented!");
 		}
 	}
 
@@ -763,7 +763,7 @@ public:
 				_boxAround->updateTempVals(this, i, Accepted);
 			}
 		} else {
-			DEVERROR("Function 'updateTempVals' for parameter ", this->name(), " is required but not implemented!");
+			throw coretools::TDevError("Function 'updateTempVals' for parameter ", this->name(), " is required but not implemented!");
 		}
 	}
 
@@ -934,7 +934,7 @@ public:
 			if (_counts[i].counts() == 0) { return Value == (Type)_storage[i]; } // has never been updated
 			return _counts[i].frac(Value);
 		}
-		DEVERROR("Counts were not stored for parameter ", this->name(), "!");
+		throw coretools::TDevError("Counts were not stored for parameter ", this->name(), "!");
 	}
 
 	template<typename IndexType = size_t> [[nodiscard]] double statePosteriors(IndexType i, size_t Value) const {

@@ -1,6 +1,7 @@
 #ifndef DISTRIBUTIONS_TCHISQDISTR_H_
 #define DISTRIBUTIONS_TCHISQDISTR_H_
 
+#include "coretools/Main/TError.h"
 #include "coretools/Main/TRandomGenerator.h"
 #include "coretools/Math/mathConstants.h"
 #include "coretools/Math/mathFunctions.h"
@@ -20,8 +21,8 @@ private:
 	void _precalculateTmpVars();
 
 	static void checkArgs(Positive x, uint32_t k) {
-		if (k == 0) { DEVERROR("k = 0 not allowed in Chisq distribution!"); }
-		if (k == 1 && x == 0.) { DEVERROR("for k == 1, x must be > 0!"); }
+		if (k == 0) { throw TDevError("k = 0 not allowed in Chisq distribution!"); }
+		if (k == 1 && x == 0.) { throw TDevError("for k == 1, x must be > 0!"); }
 	}
 
 public:

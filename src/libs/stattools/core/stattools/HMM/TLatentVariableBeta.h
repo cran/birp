@@ -165,7 +165,7 @@ protected:
 		for (; !file.empty(); file.popFront()) {
 			auto line = file.front();
 			if (line.size() != _size) {
-				UERROR("Number of elements of input file ", FileNameMeanPosStates, " (", line.size(),
+				throw coretools::TUserError("Number of elements of input file ", FileNameMeanPosStates, " (", line.size(),
 					   ") does not match expected number size (", _size, ")!");
 			}
 			for (size_t i = 0; i < line.size(); ++i) {
@@ -227,8 +227,8 @@ public:
 		_numRep    = NumRep;
 
 		// check if valid
-		if (_numStates == 0) { DEVERROR("Number of states can not be zero!"); }
-		if (_numRep == 0) { DEVERROR("Number of replicates can not be zero!"); }
+		if (_numStates == 0) { throw coretools::TDevError("Number of states can not be zero!"); }
+		if (_numRep == 0) { throw coretools::TDevError("Number of replicates can not be zero!"); }
 
 		// get initial values for phi, kappa and delta from command line
 		_phi   = parameters().get("initialPhiSmartInitialization", _phi);

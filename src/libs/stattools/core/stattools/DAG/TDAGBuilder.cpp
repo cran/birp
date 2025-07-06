@@ -47,17 +47,17 @@ void TMCMCUserInterface::_checkHeaderConfigFile(std::string_view Filename,
 			// did we parse this colname already (i.e. is it a duplicate)?
 			auto it2 = std::find(parsedColNames.begin(), parsedColNames.end(), colName);
 			if (it2 != parsedColNames.end()) // it is a duplicate -> throw
-				UERROR("Duplicate colname '", colName, "' in config file '", Filename, "'!");
+				throw coretools::TUserError("Duplicate colname '", colName, "' in config file '", Filename, "'!");
 			parsedColNames.push_back(colName);
 		} else {
 			// colName is different from what is expected
-			UERROR("Invalid colname '", colName, "' in config file '", Filename, "'!");
+			throw coretools::TUserError("Invalid colname '", colName, "' in config file '", Filename, "'!");
 		}
 	}
 
 	// check if column with "name" exists
 	auto it = std::find(parsedColNames.begin(), parsedColNames.end(), "name");
-	if (it == parsedColNames.end()) { UERROR("Mandatory colname 'name' is missing in file '", Filename, "'!"); }
+	if (it == parsedColNames.end()) { throw coretools::TUserError("Mandatory colname 'name' is missing in file '", Filename, "'!"); }
 }
 
 std::string getErrorStringObservation(std::string_view Name, const std::string &What) {
@@ -76,24 +76,24 @@ void TMCMCUserInterface::_matchConfig(TObservationDefinition &ObservationDefinit
 		if (Val.empty()) { return; }
 		ObservationDefinition.setPriorParameters(Val);
 	} else if (Config == _expectedColNames.at(i++)) { // trace
-		UERROR(getErrorStringObservation(Name, "trace file"));
+		throw coretools::TUserError(getErrorStringObservation(Name, "trace file"));
 	} else if (Config == _expectedColNames.at(i++)) { // meanVar
-		UERROR(getErrorStringObservation(Name, "meanVar file"));
+		throw coretools::TUserError(getErrorStringObservation(Name, "meanVar file"));
 	} else if (Config == _expectedColNames.at(i++)) { // state posterior file
-		UERROR(getErrorStringObservation(Name, "state posterior file"));
+		throw coretools::TUserError(getErrorStringObservation(Name, "state posterior file"));
 	} else if (Config == _expectedColNames.at(i++)) { // posterior mode file
-		UERROR(getErrorStringObservation(Name, "posterior mode file"));
+		throw coretools::TUserError(getErrorStringObservation(Name, "posterior mode file"));
 	} else if (Config == _expectedColNames.at(i++)) { // simulationFile
 		ObservationDefinition.editFile(MCMCFiles::simulation, Val);
 	} else if (Config == _expectedColNames.at(i++)) { // update
 		if (Val.empty()) { return; }
-		UERROR(getErrorStringObservation(Name, "update"));
+		throw coretools::TUserError(getErrorStringObservation(Name, "update"));
 	} else if (Config == _expectedColNames.at(i++)) { // propKernel
 		if (Val.empty()) { return; }
-		UERROR(getErrorStringObservation(Name, "proposal kernel"));
+		throw coretools::TUserError(getErrorStringObservation(Name, "proposal kernel"));
 	} else if (Config == _expectedColNames.at(i++)) { // sharedJumpSize
 		if (Val.empty()) { return; }
-		UERROR(getErrorStringObservation(Name, "shared jump size"));
+		throw coretools::TUserError(getErrorStringObservation(Name, "shared jump size"));
 	}
 }
 
@@ -134,7 +134,7 @@ void TMCMCUserInterface::_parseParamConfigurations(std::vector<TParameterBase *>
 	// search inside parameter definitions
 	if (!_parseParamConfigurations(Parameters, name, line)) {
 		if (!_parseParamConfigurations(Observations, name, line)) {
-			UERROR("Error while parsing config file " + _configFile.name() +
+			throw coretools::TUserError("Error while parsing config file " + _configFile.name() +
 					   ": No parameter or observation with name '",
 				   name, "' exists!");
 		}
@@ -159,9 +159,9 @@ void TMCMCUserInterface::_parseInitVals(std::vector<TParameterBase *> &Parameter
 	for (auto obs : Observations) {
 		// found matching definition -> throw, because we can not set initial values for observations -> design choice,
 		// change if needed
-		if (obs->name() == File.get(0)) { UERROR("Can not set initial values for observation '" + obs->name() + "'!"); }
+		if (obs->name() == File.get(0)) { throw coretools::TUserError("Can not set initial values for observation '" + obs->name() + "'!"); }
 	}
-	UERROR("No parameter with name '", File.get(0), "' exists!");
+	throw coretools::TUserError("No parameter with name '", File.get(0), "' exists!");
 }
 
 void TMCMCUserInterface::_readInitValFile(std::vector<TParameterBase *> &Parameters,
@@ -173,13 +173,13 @@ void TMCMCUserInterface::_readInitValFile(std::vector<TParameterBase *> &Paramet
 	logfile().listFlush("Reading initial values and jumpSizes from file '" + fileNameInitVal + "'...");
 	coretools::TInputMaybeRcppFile file(fileNameInitVal, coretools::FileType::Header);
 	if (file.numCols() != 3)
-		UERROR("Wrong format of file '" + fileNameInitVal + "': expected 3 columns, detected " +
+		throw coretools::TUserError("Wrong format of file '" + fileNameInitVal + "': expected 3 columns, detected " +
 			   toString(file.numCols()) + "!");
 	if (file.header()[1] != "value")
-		UERROR("Wrong format of file '" + fileNameInitVal +
+		throw coretools::TUserError("Wrong format of file '" + fileNameInitVal +
 			   "': column 2 must contain initial values and colname must be 'value'!");
 	if (file.header()[2] != "jumpSize")
-		UERROR("Wrong format of file '" + fileNameInitVal +
+		throw coretools::TUserError("Wrong format of file '" + fileNameInitVal +
 			   "': column 3 must contain initial jumpSizes and colname must be 'jumpSize'!");
 
 	for (; !file.empty(); file.popFront()) {
@@ -247,11 +247,11 @@ void TMCMCUserInterface::_parseCommandLineParamInitVals(std::vector<TParameterBa
 		if (parameters().exists(argName)) {
 			// found matching definition -> throw, because we can not set initial values for observations -> design
 			// choice, change if needed
-			UERROR("Can not set initial values for observation '" + obs->name() + "' from command line!");
+			throw coretools::TUserError("Can not set initial values for observation '" + obs->name() + "' from command line!");
 		}
 		argName = obs->name() + "." + "jumpSize";
 		if (parameters().exists(argName)) {
-			UERROR("Can not set initial jump sizes for observation '" + obs->name() + "' from command line!");
+			throw coretools::TUserError("Can not set initial jump sizes for observation '" + obs->name() + "' from command line!");
 		}
 	}
 }
@@ -284,7 +284,7 @@ void TMCMCUserInterface::writeAllConfigurationsToFile(std::string_view OutName,
 void TDAGBuilder::_checkForUniqueNames(std::string_view Name) const {
 	for (const auto &param : _allParametersAndObservations) {
 		if (param->name() == Name) {
-			DEVERROR("Parameter or observation with name '", Name,
+			throw coretools::TDevError("Parameter or observation with name '", Name,
 					 "' already exists! Please provide unique names for parameters/observations.");
 		}
 	}
@@ -313,12 +313,12 @@ void TDAGBuilder::addFuncToUpdate(const std::function<void()> &Func) { _dag.addF
 
 void TDAGBuilder::_checkForValidDAG() const {
 	// 1) we need at least one observation
-	if (_allObservations.empty()) { DEVERROR("Not a valid DAG! Need at least 1 observation."); }
+	if (_allObservations.empty()) { throw coretools::TDevError("Not a valid DAG! Need at least 1 observation."); }
 
 	// 2) a parameter can not be at the bottom of a DAG
 	for (auto it : _allParameters) {
 		if (!it->isPartOfBox()) {
-			DEVERROR("Not a valid DAG! A parameter (" + it->name() + ") can not be at the bottom of a DAG.");
+			throw coretools::TDevError("Not a valid DAG! A parameter (" + it->name() + ") can not be at the bottom of a DAG.");
 		}
 	}
 }

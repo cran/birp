@@ -8,10 +8,11 @@
 #ifndef TYPES_TSHORTVECTOR_H_
 #define TYPES_TSHORTVECTOR_H_
 
-#include <cassert>
 #include <cstddef>
 #include <iterator>
 #include <stdexcept>
+
+#include "coretools/Main/TError.h"
 
 namespace coretools {
 
@@ -21,12 +22,12 @@ private:
 	size_t _size = 0;
 
 	void _pop_n(size_t n) {
-		assert(size() >= n);
+		DEBUG_ASSERT(size() >= n);
 		for (size_t _ = 0; _ < n; ++_) { pop_back(); }
 	}
 
 	void _push_n(size_t n, const Type& v) {
-		assert(size() + n <= N_max);
+		DEBUG_ASSERT(size() + n <= N_max);
 		for (size_t _ = 0; _ < n; ++_) { push_back(v); }
 	}
 
@@ -50,7 +51,7 @@ public:
 	}
 
 	TShortVector(std::initializer_list<Type> init) {
-		assert(init.size() <= N_max);
+		DEBUG_ASSERT(init.size() <= N_max);
 		std::copy(init.begin(), init.end(), std::back_inserter(*this));
 	}
 
@@ -61,13 +62,13 @@ public:
 
 	template<size_t N>
 	TShortVector(const TShortVector<Type, N>& other) {
-		assert(other.size() <= N_max);
+		DEBUG_ASSERT(other.size() <= N_max);
 		std::copy(other.begin(), other.end(), std::back_inserter(*this));
 	}
 
 	template<size_t N>
 	TShortVector& operator=(const TShortVector<Type, N>& other) {
-		assert(other.size() <= N_max);
+		DEBUG_ASSERT(other.size() <= N_max);
 		if (size() < other.size()) {
 			std::copy(other.begin(), other.begin() + size(), begin());
 			std::copy(other.begin() + size(), other.end(), std::back_inserter(*this));
@@ -87,19 +88,19 @@ public:
 	~TShortVector() { clear(); }
 
 	void push_back(const Type &value) {
-		assert(_hasCapacity());
+		DEBUG_ASSERT(_hasCapacity());
 		::new (data() + size()) Type(value);
 		++_size;
 	}
 
 	void push_back(Type &&value) {
-		assert(_hasCapacity());
+		DEBUG_ASSERT(_hasCapacity());
 		::new (data() + size()) Type(std::move(value));
 		++_size;
 	}
 
 	void pop_back() {
-		assert(!empty());
+		DEBUG_ASSERT(!empty());
 		std::destroy_at(&back());
 		--_size;
 	}
@@ -107,7 +108,7 @@ public:
 	void clear() { _pop_n(size()); }
 
 	void resize(size_t N, const Type &value = {}) {
-		assert(N <= N_max);
+		DEBUG_ASSERT(N <= N_max);
 
 		if (N < size()) {
 			_pop_n(size() - N);
@@ -117,7 +118,7 @@ public:
 	}
 
 	void assign(size_t N, const Type &value) {
-		assert(N <= N_max);
+		DEBUG_ASSERT(N <= N_max);
 
 		if (N < size()) {
 			_pop_n(size() - N);
@@ -128,13 +129,13 @@ public:
 		}
 	}
 
-	const Type &operator[](size_t i) const noexcept {
-		assert(i < size());
+	const Type &operator[](size_t i) const noexcept(noDebug) {
+		DEBUG_ASSERT(i < size());
 		return *(data() + i);
 	}
 
-	Type &operator[](size_t i) noexcept {
-		assert(i < size());
+	Type &operator[](size_t i) noexcept(noDebug) {
+		DEBUG_ASSERT(i < size());
 		return *(data() + i);
 	}
 
@@ -147,21 +148,21 @@ public:
 		return operator[](i);
 	}
 
-	Type &front() noexcept {
-		assert(!empty());
+	Type &front() noexcept(noDebug) {
+		DEBUG_ASSERT(!empty());
 		return *data();
 	}
-	const Type &front() const noexcept {
-		assert(!empty());
+	const Type &front() const noexcept(noDebug) {
+		DEBUG_ASSERT(!empty());
 		return *data();
 	}
 
-	Type &back() noexcept {
-		assert(!empty());
+	Type &back() noexcept(noDebug) {
+		DEBUG_ASSERT(!empty());
 		return *(data() + size() - 1);
 	}
-	const Type &back() const noexcept {
-		assert(!empty());
+	const Type &back() const noexcept(noDebug) {
+		DEBUG_ASSERT(!empty());
 		return *(data() + size() - 1);
 	}
 

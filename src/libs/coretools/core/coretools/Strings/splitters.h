@@ -3,9 +3,9 @@
 
 #include <string>
 #include <type_traits>
-#include <cassert>
 
 #include "coretools/Containers/TLazyIterator.h"
+#include "coretools/Main/TError.h"
 #include "coretools/Strings/stringConstants.h"
 
 namespace coretools::str {
@@ -35,13 +35,13 @@ public:
 
 	constexpr bool empty() const noexcept { return _sv.empty(); }
 
-	constexpr const_reference front() const noexcept {
-		assert(!empty());
+	constexpr const_reference front() const noexcept(noDebug) {
+		DEBUG_ASSERT(!empty());
 		return _sv.substr(0, _count);
 	}
 
-	constexpr void popFront() noexcept {
-		assert(!empty());
+	constexpr void popFront() noexcept(noDebug) {
+		DEBUG_ASSERT(!empty());
 		if (_count == std::string_view::npos) {
 			_sv.remove_prefix(_sv.size());
 		} else {
@@ -90,13 +90,13 @@ public:
 
 	bool empty() const noexcept { return _sv.empty(); }
 
-	std::string_view front() const noexcept {
-		assert(!empty());
+	std::string_view front() const noexcept(noDebug) {
+		DEBUG_ASSERT(!empty());
 		return _sv.substr(_start);
 	}
 
-	void popFront() noexcept {
-		assert(!empty());
+	void popFront() noexcept(noDebug) {
+		DEBUG_ASSERT(!empty());
 
 		if (_start == 0) {
 			_sv = _sv.substr(0, 0);
@@ -128,13 +128,13 @@ public:
 
 	constexpr bool empty() const noexcept { return _sv.empty(); }
 
-	constexpr const_reference front() const noexcept {
-		assert(!empty());
+	constexpr const_reference front() const noexcept(noDebug) {
+		DEBUG_ASSERT(!empty());
 		return _sv.substr(0, _count);
 	}
 
-	constexpr void popFront() noexcept {
-		assert(!empty());
+	constexpr void popFront() noexcept(noDebug) {
+		DEBUG_ASSERT(!empty());
 		if (_count == std::string_view::npos) {
 			_sv.remove_prefix(_sv.size());
 		} else {

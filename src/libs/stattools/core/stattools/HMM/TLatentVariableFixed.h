@@ -5,6 +5,8 @@
 #ifndef TREESWIRL_TLATENTVARIABLEFIXED_H
 #define TREESWIRL_TLATENTVARIABLEFIXED_H
 
+#include <array>
+
 #include "coretools/algorithms.h"
 #include "stattools/EM/TDataVector.h"
 #include "stattools/EM/TLatentVariable.h"

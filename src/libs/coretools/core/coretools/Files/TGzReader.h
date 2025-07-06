@@ -22,21 +22,21 @@ class TGzReader final : public TReader {
 
 	size_t _read(void *buffer, size_t size, size_t count) override {
 		const int n = gzread(_file, buffer, size * count);
-		if (n < 0) { DEVERROR("Was not able to read file ", name(), "!"); }
+		if (n < 0) { throw TDevError("Was not able to read file ", name(), "!"); }
 		return n / size;
 	}
 	int64_t _tell() const override { return gztell(_file); }
 	void _seek(int64_t pos) override {
 		gzclearerr(_file);
 		if (gzseek(_file, pos, SEEK_SET) == -1) {
-			DEVERROR("Was not able to reach position ", pos, " in file ", name(), "!");
+			throw TDevError("Was not able to reach position ", pos, " in file ", name(), "!");
 		}
 	}
 	bool _eof() const override { return gzeof(_file); }
 
 public:
 	TGzReader(std::string_view Filename) : TReader(Filename), _file(gzopen(name().c_str(), "r")) {
-		if (!_file) { UERROR("Was not able to open file ", name(), ". Does the file exist?"); }
+		user_assert(_file, "Was not able to open file ", name(), ". Does the file exist?");
 	}
 	~TGzReader() { gzclose(_file); }
 	// Copying pointers is a problem

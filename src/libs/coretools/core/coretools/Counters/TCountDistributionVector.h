@@ -157,7 +157,8 @@ public:
 
 	const TCountDistribution<> &operator[](const size_t ID) const {
 		// can not automatically resize, as this would require a value
-		if (!exists(ID)) DEVERROR("No entry with key ", ID, " in TCountDistributionVector!");
+		DEV_ASSERT(exists(ID));
+
 		return _distVec[ID];
 	};
 
@@ -222,7 +223,7 @@ public:
 	};
 
 	template<bool write_0 = true> void write(TOutputFile &out, TConstView<std::string> names) const {
-		if (_distVec.size() != names.size()) DEVERROR("Can not write TCountDistributionVector: names have wrong size!");
+		DEV_ASSERT(_distVec.size() == names.size());
 		for (size_t i = 0; i < _distVec.size(); ++i) {
 			if (!_distVec[i].empty()) { _distVec[i].template write<write_0>(out, names[i]); }
 		}
@@ -239,9 +240,7 @@ public:
 
 	void writeAsMatrix(std::string_view filename, std::string_view label_ID, TConstView<std::string> valueNames) const {
 		// check if dim matches valueNames
-		if (max() > valueNames.size()) {
-			DEVERROR("Can not write TCountDistributionVector as matrix: value names have wrong size!");
-		}
+		DEV_ASSERT(max() <= valueNames.size());
 
 		// compile header
 		std::vector<std::string> header;
@@ -255,9 +254,7 @@ public:
 	void writeAsMatrixCombined(std::string_view filename, std::string_view label_ID, TConstView<std::string> valueNames,
 	                           TConstView<std::string> rowNames) const {
 		// check if dim matches valueNames
-		if (max() > valueNames.size()) {
-			DEVERROR("Can not write TCountDistributionVector as matrix: value names have wrong size!");
-		}
+		DEV_ASSERT(max() <= valueNames.size());
 
 		// compile header
 		std::vector<std::string> header;

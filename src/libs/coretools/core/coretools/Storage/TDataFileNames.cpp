@@ -2,6 +2,7 @@
 // Created by madleina on 29.04.21.
 //
 
+#include "coretools/Main/TError.h"
 #include "coretools/Storage/TDataFileNames.h"
 #include "coretools/Storage/TNames.h"
 #include "coretools/Strings/concatenateString.h"
@@ -25,7 +26,7 @@ std::vector<char> TDataBlock::getDelimiterLookupOneBlock(const std::vector<char>
                                                          const std::vector<size_t> &DimensionsOneBlock,
                                                          char LastDelimiter) {
 	// vector of delimiters and dimensions must have same size
-	assert(DelimitersOneBlock.size() == DimensionsOneBlock.size());
+	DEBUG_ASSERT(DelimitersOneBlock.size() == DimensionsOneBlock.size());
 
 	// get dimensions and block size
 	size_t numDim    = DimensionsOneBlock.size();
@@ -50,7 +51,7 @@ std::vector<char> TDataBlock::getDelimiterLookupOneBlock(const std::vector<char>
 	delimiterLookupOneBlock.push_back(LastDelimiter);
 
 	// safety check: for each element in block, we now have a delimiter
-	assert(delimiterLookupOneBlock.size() == blockSize);
+	DEBUG_ASSERT(delimiterLookupOneBlock.size() == blockSize);
 
 	return delimiterLookupOneBlock;
 }
@@ -107,17 +108,17 @@ void TFileNames::_fillNameClassIsPrefilled() {
 void TFileNames::_checkInput(const std::vector<char> &Delimiters) {
 	// check if vector of names that should be written matches known dimensions
 	if (_nameIsWritten.size() != _numDim) {
-		DEVERROR("Error while writing file '", _filename, "'. Size of vector NameIsWritten (", _nameIsWritten.size(),
+		throw TDevError("Error while writing file '", _filename, "'. Size of vector NameIsWritten (", _nameIsWritten.size(),
 		         ") does not match the number of dimensions of storage (", _numDim, ").");
 	}
 	// check if name vector matches numDim
 	if (_names.size() != _numDim) {
-		DEVERROR("Error while writing file '", _filename, "'. Size of vector Names (", _names.size(),
+		throw TDevError("Error while writing file '", _filename, "'. Size of vector Names (", _names.size(),
 		         ") does not match the number of dimensions of storage (", _numDim, ").");
 	}
 	// check if delimiter vector matches numDim
 	if (Delimiters.size() != _numDim) {
-		DEVERROR("Error while writing file '", _filename, "'. Size of vector Delimiters (", Delimiters.size(),
+		throw TDevError("Error while writing file '", _filename, "'. Size of vector Delimiters (", Delimiters.size(),
 		         ") does not match the number of dimensions of storage (", _numDim, ").");
 	}
 }
@@ -126,7 +127,7 @@ void TFileNames::checkIfDimensionMatchSizeName(std::string_view FileName, const 
 	// check if each element matches
 	for (size_t dim = 0; dim < _numDim; dim++) {
 		if (_names[dim]->size() != Dimensions[dim]) {
-			DEVERROR("Error while writing file '", FileName, "'. Size of dimension ", dim, " of storage (",
+			throw TDevError("Error while writing file '", FileName, "'. Size of dimension ", dim, " of storage (",
 			         Dimensions[dim], ") does not match the size of the name class of that dimension (",
 			         _names[dim]->size(), ").");
 		}
@@ -138,7 +139,7 @@ void TFileNames::checkForValidPrefilledNames(size_t Dim) {
 	// because only for those, we can reliably re-order and skip elements!
 
 	if (!_names[Dim]->storesNonDefaultNames() && _names[Dim]->isFilled()) {
-		DEVERROR("Error while reading file '", _filename, "'. Dimension ", Dim,
+		throw TDevError("Error while reading file '", _filename, "'. Dimension ", Dim,
 		         " stores default names (indices etc.), and is prefilled. This is not allowed,"
 		         "as skipping and shuffling names is not possible with indices. Don't fill the name,"
 		         "or use another name class!");
@@ -147,7 +148,7 @@ void TFileNames::checkForValidPrefilledNames(size_t Dim) {
 	// rule: only names that are written in header/as rownames are allowed to be prefilled
 	// because only for those, we can reliably re-order and skip elements!
 	if (_names[Dim]->isFilled() && !_nameIsWritten[Dim]) {
-		DEVERROR("Error while reading file '", _filename, "'. Dimension ", Dim,
+		throw TDevError("Error while reading file '", _filename, "'. Dimension ", Dim,
 		         " has pre-defined names, but these names are not written in the file. This is not allowed,"
 		         "as skipping and shuffling names is can then not reliably be done. Don't fill the name,"
 		         "or use another header format!");
@@ -155,22 +156,22 @@ void TFileNames::checkForValidPrefilledNames(size_t Dim) {
 }
 
 bool TFileNames::nameIsWritten(size_t Dim) {
-	assert(Dim < _numDim);
+	DEBUG_ASSERT(Dim < _numDim);
 	return _nameIsWritten[Dim];
 }
 
 bool TFileNames::nameIsRowName(size_t Dim) {
-	assert(Dim < _numDim);
+	DEBUG_ASSERT(Dim < _numDim);
 	return _nameIsRowName[Dim];
 }
 
 bool TFileNames::nameIsColName(size_t Dim) {
-	assert(Dim < _numDim);
+	DEBUG_ASSERT(Dim < _numDim);
 	return !_nameIsRowName[Dim];
 }
 
 size_t TFileNames::getSizeNames(size_t Dim) {
-	assert(Dim < _numDim);
+	DEBUG_ASSERT(Dim < _numDim);
 	return _names[Dim]->size();
 }
 
@@ -192,7 +193,7 @@ void TFileNames::_checkForUnusedNames(size_t NumStoredNames, size_t Dim) {
 			if (std::find(_indexToStoreName[Dim].begin(), _indexToStoreName[Dim].end(), j) ==
 			    _indexToStoreName[Dim].end()) {
 				// not found
-				UERROR("Could not find required name ", (*_names[Dim])[j], " of dimension ", Dim,
+				throw TUserError("Could not find required name ", (*_names[Dim])[j], " of dimension ", Dim,
 				       " in row- or column names of file ", _filename, "!");
 			}
 		}
@@ -237,7 +238,7 @@ void TFileNames::_setLengthNamedDimension(size_t Length, size_t Dim, std::vector
                                           std::vector<bool> &DimensionsFilled) {
 	// check if this dimension already has specific value -> if yes, check if it is the same as inferred based on header
 	if (DimensionsFilled[Dim] && Dimensions[Dim] != Length) {
-		DEVERROR("Error while reading file ", _filename, ". Dimension ", Dim, " has already been set to ",
+		throw TDevError("Error while reading file ", _filename, ". Dimension ", Dim, " has already been set to ",
 		         Dimensions[Dim], ", which differs from the length ", Length,
 		         " that was inferred based on row/col names.");
 	}
@@ -250,7 +251,7 @@ void TFileNames::setLengthUnnamedDimension(size_t Length, size_t Dim, std::vecto
                                            std::vector<bool> &DimensionsFilled) {
 	// check if this dimension already has specific value -> if yes, check if it is the same as inferred based on header
 	if (DimensionsFilled[Dim] && Dimensions[Dim] != Length) {
-		DEVERROR("Error while reading file ", _filename, ". Dimension ", Dim, " has already been set to ",
+		throw TDevError("Error while reading file ", _filename, ". Dimension ", Dim, " has already been set to ",
 		         Dimensions[Dim], ", which differs from the length ", Length,
 		         " that was inferred based on row/col names.");
 	}
@@ -267,9 +268,9 @@ void TFileNames::setLengthUnnamedDimension(size_t Length, size_t Dim, std::vecto
 
 bool TFileNames::elementIsStored(size_t Dim, size_t IndexInDim) {
 	// check if indices are valid
-	assert(Dim < _numDim);
+	DEBUG_ASSERT(Dim < _numDim);
 	if (IndexInDim >= _storeName[Dim].size()) {
-		DEVERROR("IndexInDim (", IndexInDim, ") for dimension ", Dim, " is larger than size of stored names (",
+		throw TDevError("IndexInDim (", IndexInDim, ") for dimension ", Dim, " is larger than size of stored names (",
 		         _storeName[Dim].size(), ")!");
 	}
 	return _storeName[Dim][IndexInDim];
@@ -277,14 +278,14 @@ bool TFileNames::elementIsStored(size_t Dim, size_t IndexInDim) {
 
 size_t TFileNames::indexToStoreElement(size_t Dim, size_t IndexInDim) {
 	// check if indices are valid
-	assert(Dim < _numDim);
+	DEBUG_ASSERT(Dim < _numDim);
 	if (IndexInDim >= _indexToStoreName[Dim].size()) {
-		DEVERROR("IndexInDim (", IndexInDim, ") for dimension ", Dim, " is larger than size of stored names (",
+		throw TDevError("IndexInDim (", IndexInDim, ") for dimension ", Dim, " is larger than size of stored names (",
 		         _indexToStoreName[Dim].size(), ")!");
 	}
 	// check if element is stored
 	if (!elementIsStored(Dim, IndexInDim)) {
-		DEVERROR("IndexInDim (", IndexInDim, ") for dimension ", Dim,
+		throw TDevError("IndexInDim (", IndexInDim, ") for dimension ", Dim,
 		         " is not stored! Do not ask for index where to store it.");
 	}
 	return _indexToStoreName[Dim][IndexInDim];
@@ -295,7 +296,7 @@ void TFileNames::finalizeFillNames(size_t Dim, size_t LengthFromStorage) {
 
 	// check if all non-default name classes are filled
 	if (_names[Dim]->storesNonDefaultNames() && !_names[Dim]->isFilled()) {
-		DEVERROR("Error while reading file '", _filename, "'. Name class of dimension ", Dim,
+		throw TDevError("Error while reading file '", _filename, "'. Name class of dimension ", Dim,
 		         " stores non-default names, but has not been filled!");
 	}
 
@@ -305,7 +306,7 @@ void TFileNames::finalizeFillNames(size_t Dim, size_t LengthFromStorage) {
 		if (!_nameIsWritten[Dim] && !_names[Dim]->isFilled()) {
 			_names[Dim]->resize(LengthFromStorage);
 		} else { // length do not match
-			UERROR("Error while reading file '", _filename, "'. Size of dimension ", Dim, " of storage (",
+			throw TUserError("Error while reading file '", _filename, "'. Size of dimension ", Dim, " of storage (",
 			       LengthFromStorage, ") does not match the size of the names of that dimension (", _names[Dim]->size(),
 			       ").");
 		}
@@ -347,7 +348,7 @@ void TRowNames::_correctWrittenNamesBasedOnFormat() {
 
 void TRowNames::setDelimiterRowNames(char DelimiterRowNames) {
 	if (DelimiterRowNames == '\0') {
-		DEVERROR(
+		throw TDevError(
 		    "Can not set the delimiter for rownames to empty! When reading file, we would not know where to split.");
 	}
 	_delimiterRowNames = DelimiterRowNames;
@@ -370,7 +371,7 @@ void TRowNames::extractTitleRowNames(std::string &Line, bool ThrowIfTitleDoesntM
 			} else {
 				// prefilled names -> check for match, if wanted, and throw if they don't match
 				if (ThrowIfTitleDoesntMatch && title != _names[dim]->getTitleVec()) {
-					UERROR("Error while reading title of row names in file ", _filename, ": Title that was expected (",
+					throw TUserError("Error while reading title of row names in file ", _filename, ": Title that was expected (",
 					       _names[dim]->getTitle(), ") does not match title detected in file (",
 					       coretools::str::concatenateString(title, _names[dim]->getDelimNames()), ")!");
 				}
@@ -427,14 +428,14 @@ void TRowNames::_setRowNames(const std::vector<std::string> &UniqueNames, size_t
 		// check: did we already add names to class? -> if yes, check if they are equal
 		if (_names[Dim]->isFilled()) {
 			if (_names[Dim]->size() != UniqueNames.size()) {
-				UERROR("While reading file ", _filename, ": Size of row names (", UniqueNames.size(), ") of dimension ",
+				throw TUserError("While reading file ", _filename, ": Size of row names (", UniqueNames.size(), ") of dimension ",
 				       Dim, " does not match expected size of row name (", _names[Dim]->size(),
 				       ") that was inferred from first block.");
 			}
 			// check if names are equal, too
 			for (size_t i = 0; i < _names[Dim]->size(); i++) {
 				if ((*_names[Dim])[i] != UniqueNames[i]) {
-					UERROR("While reading file ", _filename, ": Row name ", UniqueNames[i], " of dimension ", Dim,
+					throw TUserError("While reading file ", _filename, ": Row name ", UniqueNames[i], " of dimension ", Dim,
 					       " at index ", i, " does not match expected row name at that position ", (*_names[Dim])[i],
 					       " that was inferred from first block.");
 				}
@@ -468,7 +469,7 @@ void TRowNames::_setLengthSubsequentDimensions_RowName(size_t Dim, size_t Produc
 	if (counterUnknown == 0) {
 		// check if it is the same as expected
 		if (prodAllKnownDimensions != ProductOverAllNext) {
-			UERROR("Error while reading file ", _filename, ". The product of all subsequent dimensions of dimension ",
+			throw TUserError("Error while reading file ", _filename, ". The product of all subsequent dimensions of dimension ",
 			       Dim, " has already been set to ", prodAllKnownDimensions, ", which differs from the product ",
 			       ProductOverAllNext, " that was inferred based on row names.");
 		} // else nice, we get the same!
@@ -571,7 +572,7 @@ void TRowNames::_checkIfBlockRowNamesMatchFirstBlock(const std::vector<std::stri
 	if (elementIsStored(Dim, indexInFile)) {
 		size_t indexInNameClass = indexToStoreElement(Dim, indexInFile);
 		if (_names[Dim]->getName(indexInNameClass) != Name) {
-			UERROR("While reading file ", _filename, ": Row name ",
+			throw TUserError("While reading file ", _filename, ": Row name ",
 			       coretools::str::concatenateString(Name, _names[Dim]->getDelimNames()), " of dimension ", Dim,
 			       " at index ", indexInFile, " does not match expected row name at that position ",
 			       (*_names[Dim])[indexInNameClass], " that was inferred from first block.");
@@ -620,7 +621,7 @@ void TColNameBase::initialize(const std::vector<char> &Delimiters) {
 }
 
 void TColNameBase::setDelimiterConcatenation(char) {
-	DEVERROR("Can not set Delimiter for concatenation for base class/deriving classes that do not explicitly override "
+	throw TDevError("Can not set Delimiter for concatenation for base class/deriving classes that do not explicitly override "
 	         "this function!");
 }
 
@@ -628,7 +629,7 @@ void TColNameBase::_checkDelimConcatenation(char DelimiterMostOuterColName, char
 	// rule: delimiter for concatenation can not be the same as the delimiter of the most outer colname!
 	if (DelimiterMostOuterColName == DelimConcatenation) {
 		std::string delimMostOuterString = {DelimiterMostOuterColName};
-		DEVERROR("Delimiter of most outer colname (", delimMostOuterString,
+		throw TDevError("Delimiter of most outer colname (", delimMostOuterString,
 		         ") is the same as the delimiter that is used for concatenation! This is currently not allowed, "
 		         "because I can not distinguish dimensions.");
 	}
@@ -640,7 +641,7 @@ void TColNameBase::_checkDelimNames(const std::vector<char> &Delimiters) {
 		if (_nameIsWritten[dim]) {
 			if (std::find(Delimiters.begin(), Delimiters.end(), _names[dim]->getDelimNames()) != Delimiters.end()) {
 				std::string delimAsString = {_names[dim]->getDelimNames()};
-				DEVERROR("Delimiter that is used for pasting colnames of dimension ", dim, " (", delimAsString,
+				throw TDevError("Delimiter that is used for pasting colnames of dimension ", dim, " (", delimAsString,
 				         ") is the same as the delimiter that is used for separating dimensions! This is currently "
 				         "not allowed, because I can not distinguish dimensions.");
 			}
@@ -849,7 +850,7 @@ void TColNameMultiLine::_checkIfHeaderMatchesInferredDimensions(
 						size_t indexStoredElement              = indexToStoreElement(dim, index);
 						std::string nameFromInferredDimensions = (*_names[dim])[indexStoredElement];
 						if (nameFromInferredDimensions != nameFromFile) {
-							DEVERROR("While parsing multi-line header of file ", _filename, ": Colname at line ",
+							throw TDevError("While parsing multi-line header of file ", _filename, ": Colname at line ",
 							         writtenDim, " and index ", index, " (", nameFromFile,
 							         ") does not match expected column name (", nameFromInferredDimensions, ")!");
 						}
@@ -933,7 +934,7 @@ TColNameConcatenated::TColNameConcatenated(size_t NumDim, const std::vector<bool
 
 void TColNameConcatenated::setDelimiterConcatenation(char DelimConcatenation) {
 	if (DelimConcatenation == '\0') {
-		DEVERROR("Can not set the delimiter for concatenating colnames to empty (\\0)! When reading file, we would not "
+		throw TDevError("Can not set the delimiter for concatenating colnames to empty (\\0)! When reading file, we would not "
 		         "know where to split.");
 	}
 	_delimConcatenation = DelimConcatenation;
@@ -1025,7 +1026,7 @@ void TColNameConcatenated::_checkIfHeaderMatchesInferredDimensions(
 						size_t indexStoredElement              = indexToStoreElement(dim, index);
 						std::string nameFromInferredDimensions = (*_names[dim])[indexStoredElement];
 						if (nameFromInferredDimensions != nameFromFile) {
-							DEVERROR("While parsing concatenated header of file ", _filename, ": Colname at dimension ",
+							throw TDevError("While parsing concatenated header of file ", _filename, ": Colname at dimension ",
 							         headerDim, " and index ", index, " (", nameFromFile,
 							         ") does not match expected column name (", nameFromInferredDimensions, ")!");
 						}
@@ -1056,7 +1057,7 @@ std::vector<std::vector<std::string>> TColNameConcatenated::_getUniqueColNames(s
 			previousSize = names_oneCell.size();
 		} else if (names_oneCell.size() != previousSize) {
 			std::string delimString = {_delimConcatenation};
-			UERROR("While reading colnames of concatenated header of file ", _filename, ": Number of ", delimString,
+			throw TUserError("While reading colnames of concatenated header of file ", _filename, ": Number of ", delimString,
 			       " delimited-elements in first header entry (", previousSize,
 			       ") differs from the number of elements in subsequent entry (", names_oneCell.size(), ")!");
 		}
@@ -1079,7 +1080,7 @@ void TColNameConcatenated::_parseHeader(std::vector<std::string> &Header, std::v
                                         std::vector<bool> &DimensionsFilled, const std::vector<char> &Delimiters,
                                         const std::unique_ptr<TRowNames> &RowNames, bool ThrowIfTitleDoesntMatch) {
 	// check on validity
-	assert(Header.size() == 1);
+	DEBUG_ASSERT(Header.size() == 1);
 	_checkDelimConcatenation(_getDelimMostOuterColumn(Delimiters), _delimConcatenation);
 
 	// remove title of rowName
@@ -1125,7 +1126,7 @@ TColNameFull::TColNameFull(size_t NumDim, const std::vector<bool> &NameIsWritten
 
 void TColNameFull::setDelimiterConcatenation(char DelimConcatenation) {
 	if (DelimConcatenation == '\0') {
-		DEVERROR("Can not set the delimiter for concatenating colnames to empty (\\0)! When reading file, we would not "
+		throw TDevError("Can not set the delimiter for concatenating colnames to empty (\\0)! When reading file, we would not "
 		         "know where to split.");
 	}
 	_delimConcatenation = DelimConcatenation;
@@ -1226,7 +1227,7 @@ void TColNameFull::_parseHeader(std::vector<std::string> &Header, std::vector<si
                                 std::vector<bool> &DimensionsFilled, const std::vector<char> &Delimiters,
                                 const std::unique_ptr<TRowNames> &RowNames, bool ThrowIfTitleDoesntMatch) {
 	// check on validity
-	assert(Header.size() == 1);
+	DEBUG_ASSERT(Header.size() == 1);
 	_checkDelimConcatenation(_getDelimMostOuterColumn(Delimiters), _delimConcatenation);
 
 	// remove title of rowName
@@ -1279,7 +1280,7 @@ void TColNameFull::_checkIfHeaderMatchesInferredDimensions(std::vector<std::stri
 						size_t indexStoredElement              = indexToStoreElement(dim, index);
 						std::string nameFromInferredDimensions = (*_names[dim])[indexStoredElement];
 						if (nameFromInferredDimensions != nameFromFile) {
-							DEVERROR("While parsing full header of file ", _filename, ": Colname at dimension ",
+							throw TDevError("While parsing full header of file ", _filename, ": Colname at dimension ",
 							         headerDim, " and index ", index, " (", nameFromFile,
 							         ") does not match expected column name (", nameFromInferredDimensions, ")!");
 						}

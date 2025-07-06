@@ -14,6 +14,7 @@
 
 #include "coretools/IntegrationTests/TTest.h"     // for TTest
 #include "coretools/IntegrationTests/TTestList.h" // for TTestList
+#include "coretools/Main/TError.h"
 #include "coretools/Main/TLog.h"
 #include "coretools/Main/TParameters.h"
 
@@ -41,7 +42,7 @@ void TTesting::printTests() {
 	else if (testList->size() == 1)
 		instances::logfile().startIndent("Will run the following test:");
 	else
-		UERROR("No tests requested!");
+		throw TUserError("No tests requested!");
 
 	testList->printTestToLogfile();
 	instances::logfile().endIndent();
@@ -51,10 +52,10 @@ void TTesting::runTests(TTaskList *taskList) {
 	using str::toString;
 	// open report file
 	std::ofstream out(outputName.c_str());
-	if (!out) UERROR("Failed to open file '", outputName, "' for writing!");
+	user_assert(out.is_open(), "Failed to open file '", outputName, "' for writing!");
 
 	// prepare test runs
-	if (testList->size() < 1) UERROR("No tests requested!");
+	user_assert(testList->size() > 0, "No tests requested!");
 
 	// now run all tests
 	if (testList->size() > 1)

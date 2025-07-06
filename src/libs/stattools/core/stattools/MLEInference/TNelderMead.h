@@ -7,6 +7,7 @@
 
 #include "coretools/Containers/TView.h"
 #include "coretools/Strings/toString.h"
+#include "coretools/Types/probability.h"
 #include "stattools/MLEInference/TReturnCodes.h"
 #include <array>
 #include <cassert>
@@ -156,10 +157,19 @@ template<size_t NDim = 0> class TNelderMead {
 	// temporary values
 	Simplex _simplex;
 
-	// termination criteria
+	// first termination criterion: compare value at best and worst vertex and terminate if they are very close
 	double _fractionalConvergenceTolerance = 10e-15;
 	size_t _counterFuncEvaluations         = 0;     // the number of function evaluations
 	size_t _maxNumFuncEvaluations          = 20000; // maximal number of function evaluations
+
+	// second termination criterion: calculate fraction of iterations where the best value didn't move and terminate
+	// if this is above a certain threshold. But only do this after running a certain fraction of iterations of the
+	// total number of evaluations
+	double _fracIterSameBestValue       = 0.2;
+	double _fracMaxNumFuncSameBestValue = 0.1;
+	double _val_best{};
+	size_t _counterSameBestValue    = 0;
+	size_t _counterCheckConvergence = 0;
 
 	// dynamically adjust tolerance to terminate?
 	bool _dynamicallyAdjustTolerance                = false;
@@ -224,6 +234,17 @@ template<size_t NDim = 0> class TNelderMead {
 		_dynamicallyAdjustTolerance = false;
 	}
 
+	bool terminate_1(double fractionalRange) {
+		return fractionalRange < _fractionalConvergenceTolerance &&
+		       _counterFuncEvaluations > _numFunctionCallsUntilAdjustingTolerance;
+	}
+
+	bool terminate_2() {
+		const double frac_total           = (double)_counterFuncEvaluations / (double)_maxNumFuncEvaluations;
+		const double frac_same_best_value = (double)_counterSameBestValue / (double)_counterCheckConvergence;
+		return frac_total >= _fracMaxNumFuncSameBestValue && frac_same_best_value >= _fracIterSameBestValue;
+	}
+
 	bool _terminate(size_t IndexLowestVertex, size_t IndexHighestVertex) {
 		// check if we should adjust tolerance
 		if (_dynamicallyAdjustTolerance && _counterFuncEvaluations >= _numFunctionCallsUntilAdjustingTolerance) {
@@ -232,27 +253,35 @@ template<size_t NDim = 0> class TNelderMead {
 		// calculate fractional range, i.e. difference between best and worst function value
 		const double fractionalRange =
 		    _calculateFractionalRange(_simplex[IndexHighestVertex].value(), _simplex[IndexLowestVertex].value());
-		if (fractionalRange < _fractionalConvergenceTolerance &&
-		    _counterFuncEvaluations > _numFunctionCallsUntilAdjustingTolerance) { // terminate!
+		if (terminate_1(fractionalRange) || terminate_2()) { // terminate!
 			const auto best = _getBestVertex(IndexLowestVertex);
 			_returnObj.setSucceeded(best, minimum, _simplex[IndexLowestVertex].value(), _counterFuncEvaluations,
 			                        "In Nelder-Mead algorithm: Found minimum within " +
 			                            coretools::str::toString(_counterFuncEvaluations) + " function evaluations.");
 			return true;
-		} else { // don't terminate yet
-			// check if we reached maximal number of function evaluations
-			if (_counterFuncEvaluations >= _maxNumFuncEvaluations) {
-				const auto best = _getBestVertex(IndexLowestVertex);
-				_returnObj.setFailed(
-				    "In Nelder-Mead algorithm: Failed to find minimum. Reached maximum number of "
-				    "function evaluations (" +
-				        coretools::str::toString(_maxNumFuncEvaluations) +
-				        ")! Fractional range at end: " + coretools::str::toString(fractionalRange) + ".",
-				    reachMaxIterations, best, minimum, _simplex[IndexLowestVertex].value(), _counterFuncEvaluations);
-				return true;
-			}
-			return false;
 		}
+		// don't terminate yet
+		// check if we reached maximal number of function evaluations
+		if (_counterFuncEvaluations >= _maxNumFuncEvaluations) {
+			const auto best = _getBestVertex(IndexLowestVertex);
+			_returnObj.setFailed("In Nelder-Mead algorithm: Failed to find minimum. Reached maximum number of "
+			                     "function evaluations (" +
+			                         coretools::str::toString(_maxNumFuncEvaluations) +
+			                         ")! Fractional range at end: " + coretools::str::toString(fractionalRange) + ".",
+			                     reachMaxIterations, best, minimum, _simplex[IndexLowestVertex].value(),
+			                     _counterFuncEvaluations);
+			return true;
+		}
+		// update counters
+		_counterCheckConvergence++;
+		if (_simplex[IndexLowestVertex].value() == _val_best) {
+			_counterSameBestValue++;
+		} else {
+			_counterSameBestValue = 0;
+			_val_best             = _simplex[IndexLowestVertex].value();
+		}
+
+		return false;
 	}
 
 	Vertex _getBestVertex(size_t IndexLowestVertex) {
@@ -395,6 +424,9 @@ public:
 	void setMaxNumFunctionEvaluations(size_t MaxNumFunctionEvaluations) {
 		_maxNumFuncEvaluations = MaxNumFunctionEvaluations;
 	}
+
+	void setFracIterSameBestValue(coretools::Probability frac) { _fracIterSameBestValue = frac; }
+	void setFracMaxNumFuncSameBestValue(coretools::Probability frac) { _fracMaxNumFuncSameBestValue = frac; }
 
 	void dynamicallyAdjustTolerance(double ValueToCompareTo, double FactorPrecision,
 	                                size_t NumFunctionCallsUntilAdjustment) {

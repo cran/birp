@@ -37,10 +37,10 @@ public:
 
 	void setWeights(const std::array<std::vector<double>, NumDim> & /*Statistics*/,
 					const std::vector<std::string> & /*Args*/, coretools::Positive /*FracUpdates*/) {
-		DEVERROR("Attempt to set weights failed: did you forget to specify update weights in parameter specification?");
+		throw coretools::TDevError("Attempt to set weights failed: did you forget to specify update weights in parameter specification?");
 	}
 	void setWeights(const std::vector<double> & /*Weights*/, coretools::Positive /*FracUpdates*/) {
-		DEVERROR("Attempt to set weights failed: did you forget to specify update weights in parameter specification?");
+		throw coretools::TDevError("Attempt to set weights failed: did you forget to specify update weights in parameter specification?");
 	}
 
 	void prepareIteration() {}
@@ -84,7 +84,7 @@ private:
 
 	static size_t _getClosestMatch(const std::vector<double> &Cum, double ApproxEnd) {
 		auto it = std::lower_bound(Cum.begin(), Cum.end(), ApproxEnd);
-		if (it == Cum.end()) { DEVERROR("Could not find ", *it, " in cumulative weights!"); }
+		if (it == Cum.end()) { throw coretools::TDevError("Could not find ", *it, " in cumulative weights!"); }
 		if (it != Cum.begin()) { // check if the one on the left is actually closer
 			if (std::fabs(*it - ApproxEnd) > std::fabs(*(it - 1) - ApproxEnd)) { it--; }
 		}

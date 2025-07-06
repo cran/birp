@@ -5,6 +5,7 @@
 
 #include "coretools/Counters/TCountDistribution.h"
 #include "coretools/Storage/TStorage.h"
+#include "coretools/Main/TError.h"
 
 namespace coretools {
 
@@ -42,7 +43,7 @@ public:
 
 	void add(TCountDistributionMultiDimensional<TypeValue, TypeCounts, AllowResize> &Other) {
 		// only works if dimensions are equal
-		assert(_distVec.dimensions() == Other.dimensions());
+		DEBUG_ASSERT(_distVec.dimensions() == Other.dimensions());
 		for (size_t i = 0; i < _distVec.size(); ++i) { _distVec[i].add(Other[i]); }
 	};
 

@@ -5,7 +5,6 @@
 #ifndef TSUMLOG_H
 #define TSUMLOG_H
 
-#include <cassert>
 #include <cmath>
 #include <cstddef>
 #include <cstdint>
@@ -103,10 +102,10 @@ template<size_t N, typename Container> double getBinnedSumOfLogs(const Container
 // Sum of logs for dynamic bins
 //-------------------------------------------
 
-constexpr int getExponentOfDouble(double Value) noexcept {
+constexpr int getExponentOfDouble(double Value) noexcept(noDebug) {
 	// function to get the exponent of a double by bit-masking
 	// idea from https://web.mit.edu/hyperbook/Patrikalakis-Maekawa-Cho/node48.html
-	assert(Value != 0.0);
+	DEBUG_ASSERT(Value != 0.0);
 
 	constexpr size_t MSW = 3; // Little-endianness: left-most 16-bit short is sh[3]. If system is big-endian: must use 0
 	union {
@@ -161,7 +160,7 @@ public:
 		// Currently compilers don't support getting endianness at compile time (only C++20 allows it).
 		// As most processors are little endian, it should not be problematic; if it is, then we can add an if-
 		// that takes the correct short (0 or 3) depending on architecture
-		if (impl::isBigEndian()) { DEVERROR("System is running on big endian."); }
+		dev_assert(!impl::isBigEndian(), "System is running on big endian.");
 	}
 
 	void add(double Value) {

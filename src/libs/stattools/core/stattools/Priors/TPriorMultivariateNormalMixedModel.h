@@ -28,12 +28,12 @@ template<typename Storage> auto getDimensionNameForZ(const std::vector<Storage *
 
 	for (const auto &storage : StorageBelow) {
 		if (storage->dimensions()[0] != N) {
-			DEVERROR("N of storage below (=", storage->dimensions()[0], ") and of other shared storage (=", N,
+			throw coretools::TDevError("N of storage below (=", storage->dimensions()[0], ") and of other shared storage (=", N,
 					 ") do not match!");
 		}
 		// check if ptr to dimension names is the same
 		if (storage->getDimensionName(0) != dimNamesFirstDim) {
-			DEVERROR("Pointer to dimension name class of dimension 0 of storage below differs from that of other "
+			throw coretools::TDevError("Pointer to dimension name class of dimension 0 of storage below differs from that of other "
 					 "shared storage!");
 		}
 	}
@@ -50,7 +50,7 @@ void checkForFixedInitialValues(const TypeParamM *M, const TypeParamMrr *Mrr, co
 		if (!Mrr->hasFixedInitialValue() && !Mrs->hasFixedInitialValue() && !M->hasFixedInitialValue()) {
 			// all are estimated -> ok
 		} else {
-			UERROR("Error when initializing ", Name,
+			throw coretools::TUserError("Error when initializing ", Name,
 				   " prior: parameters m, Mrr and Mrs for must either all or none have an initial value. Can not "
 				   "initialize only partially!");
 		}
@@ -435,7 +435,7 @@ public:
 			likelihood *= impl::mvn::calcPriorDensity(*storage, i, _mus[Z], _m[Z], _Mrr[Z], _Mrs[Z], _dim);
 
 			if (!likelihood.isInsideInterval()) {
-				DEVERROR("likelihood (", likelihood,
+				throw coretools::TDevError("likelihood (", likelihood,
 						 ") is not a probability. Probably, an underflow has happened. Should use log-sum-exp trick to "
 						 "prevent this!");
 			}

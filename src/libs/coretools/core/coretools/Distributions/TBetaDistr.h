@@ -68,9 +68,8 @@ public:
 	static std::pair<StrictlyPositive, StrictlyPositive> calculateAlphaBetaForGivenMeanVar(Probability Mean,
 																						   StrictlyPositive Var) {
 		// specify mean and variance of Beta distribution -> calculate alpha and beta that yield this mean and variance
-		if (Var >= (Mean * (1. - Mean))) { // check if mean and var fulfil condition
-			DEVERROR("Argument Var (", Var, ") must be smaller than '", Mean, "' * (1 - '", Mean, "')!");
-		}
+		DEV_ASSERT(Var < (Mean * (1. - Mean)));
+
 		double nu = Mean * (1. - Mean) / Var - 1.;
 		return {Mean * nu, (1. - Mean) * nu};
 	}

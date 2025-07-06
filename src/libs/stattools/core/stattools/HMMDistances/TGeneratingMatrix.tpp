@@ -43,7 +43,7 @@ const arma::mat &TGeneratingMatrixBase<PrecisionType, NumStatesType>::getUnparam
 	// for some generating matrices (those that only have one parameter),
 	// it is possible to seperate the generating matrix into parameter * Matrix
 	// where Matrix is then unparametrized
-	DEVERROR("not implemented for base class TGeneratingMatrixBase!");
+	throw coretools::TDevError("not implemented for base class TGeneratingMatrixBase!");
 }
 
 //-------------------------------------------
@@ -60,7 +60,7 @@ TGeneratingMatrixBool<PrecisionType, NumStatesType>::TGeneratingMatrixBool()
 template<typename PrecisionType, typename NumStatesType>
 void TGeneratingMatrixBool<PrecisionType, NumStatesType>::resize(NumStatesType NumStates) {
 	if (NumStates != 2) {
-		DEVERROR("Generating matrix for booleans can only have 2 states (not " + coretools::str::toString(NumStates) +
+		throw coretools::TDevError("Generating matrix for booleans can only have 2 states (not " + coretools::str::toString(NumStates) +
 				 ")!");
 	}
 	TGeneratingMatrixBase<PrecisionType, NumStatesType>::resize(NumStates);
@@ -112,7 +112,7 @@ TGeneratingMatrixLadder<PrecisionType, NumStatesType>::TGeneratingMatrixLadder(N
 template<typename PrecisionType, typename NumStatesType>
 void TGeneratingMatrixLadder<PrecisionType, NumStatesType>::resize(NumStatesType NumStates) {
 	if (NumStates < 2) {
-		DEVERROR("Generating matrix for ladder-type transition matrix must have at least 2 states (not " +
+		throw coretools::TDevError("Generating matrix for ladder-type transition matrix must have at least 2 states (not " +
 				 coretools::str::toString(NumStates) + ")!");
 	}
 	TGeneratingMatrixBase<PrecisionType, NumStatesType>::resize(NumStates);
@@ -244,11 +244,11 @@ TGeneratingMatrixScaledLadder<PrecisionType, NumStatesType>::TGeneratingMatrixSc
 template<typename PrecisionType, typename NumStatesType>
 void TGeneratingMatrixScaledLadder<PrecisionType, NumStatesType>::resize(NumStatesType NumStates) {
 	if (NumStates < 3) {
-		DEVERROR("Generating matrix for ladder-type transition matrix must have at least 3 states (not ", NumStates,
+		throw coretools::TDevError("Generating matrix for ladder-type transition matrix must have at least 3 states (not ", NumStates,
 				 ")!");
 	}
 	if (NumStates % 2 == 0) {
-		DEVERROR("Generating matrix for ladder-type transition matrix must have an uneven number of states (not ",
+		throw coretools::TDevError("Generating matrix for ladder-type transition matrix must have an uneven number of states (not ",
 				 NumStates, ")!");
 	}
 	TGeneratingMatrixBase<PrecisionType, NumStatesType>::resize(NumStates);
@@ -342,7 +342,7 @@ TGeneratingMatrixScaledLadderAttractorShift<PrecisionType, NumStatesType>::TGene
 template<typename PrecisionType, typename NumStatesType>
 void TGeneratingMatrixScaledLadderAttractorShift<PrecisionType, NumStatesType>::resize(NumStatesType NumStates) {
 	if (NumStates < 2) {
-		DEVERROR("Generating matrix for shifted ladder-type transition matrix must have at least 2 states (not ",
+		throw coretools::TDevError("Generating matrix for shifted ladder-type transition matrix must have at least 2 states (not ",
 				 NumStates, ")!");
 	}
 	TGeneratingMatrixBase<PrecisionType, NumStatesType>::resize(NumStates);
@@ -435,7 +435,7 @@ TGeneratingMatrixScaledLadderAttractorShift2<
 template<typename PrecisionType, typename NumStatesType>
 void TGeneratingMatrixScaledLadderAttractorShift2<PrecisionType, NumStatesType>::resize(NumStatesType NumStates) {
 	if (NumStates < 2) {
-		DEVERROR("Generating matrix for shifted ladder-type transition matrix must have at least 2 states (not ",
+		throw coretools::TDevError("Generating matrix for shifted ladder-type transition matrix must have at least 2 states (not ",
 				 NumStates, ")!");
 	}
 	TGeneratingMatrixBase<PrecisionType, NumStatesType>::resize(NumStates);

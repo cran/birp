@@ -8,6 +8,7 @@
 #ifndef MATHFUNCTIONS_H_
 #define MATHFUNCTIONS_H_
 
+#include "coretools/Main/TError.h"
 #include "coretools/Types/commonWeakTypes.h"
 #include "coretools/Types/probability.h"
 #include <array>
@@ -53,14 +54,14 @@ template<unsigned int exp, typename T> constexpr T uPow(T base) noexcept {
 //------------------------------------------------
 // Gamma function
 //------------------------------------------------
-double gammaLog(double z) noexcept;
+double gammaLog(double z) noexcept(noDebug);
 
 //------------------------------------------------
 // Difference of Gamma functions and betaLog
 //------------------------------------------------
 
-double diffGammaLog(double a, double b) noexcept;
-double betaLog(double a, double b) noexcept;
+double diffGammaLog(double a, double b) noexcept(noDebug);
+double betaLog(double a, double b) noexcept(noDebug);
 
 //----------------------------------------------------------------
 // Factorials, see Numerical recipes (third edition), chapter 6.1
@@ -69,9 +70,8 @@ namespace TFactorial {
 template<typename T> constexpr double factorial(T n) {
 	// Returns the value n! as a floating-point number.
 	static_assert(std::is_integral<T>::value, "Integral required.");
-	if constexpr (std::is_signed_v<T>)
-		if (n < 0) DEVERROR("Argument n (= ", n, ") cannot be smaller than 0!");
-	if (n > 170) DEVERROR("Argument n (= ", n, ") in factorial must be <= 170!");
+	if constexpr (std::is_signed_v<T>) DEV_ASSERT(n >= 0);
+	DEV_ASSERT(n <= 170);
 
 	constexpr std::array<double, 171> factorialTable = []() {
 		std::array<double, 171> fs{1.};
@@ -84,8 +84,7 @@ template<typename T> constexpr double factorial(T n) {
 template<typename T> double factorialLog(T n) {
 	// Returns ln(n!)
 	static_assert(std::is_integral<T>::value, "Integral required.");
-	if constexpr (std::is_signed_v<T>)
-		if (n < 0) DEVERROR("Argument n (= ", n, ") in factorialLog must be >= 0!");
+	if constexpr (std::is_signed_v<T>) DEV_ASSERT(n >= 0);
 	if (n == 0) { return 0.0; } // gammaLog is slightly inprecise
 
 	constexpr size_t NTOP                                = 2000;

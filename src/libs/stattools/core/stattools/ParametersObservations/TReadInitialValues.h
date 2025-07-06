@@ -17,7 +17,7 @@ protected:
 	void _copyValsToStorage(const std::vector<Type> &Vals, StorageType &Storage, std::string_view Name) const {
 		// check if size matches
 		if (Vals.size() != Storage.size()) {
-			UERROR("Size of initial values (", Vals.size(), ") for parameter ", Name, " does not match expected size (",
+			throw coretools::TUserError("Size of initial values (", Vals.size(), ") for parameter ", Name, " does not match expected size (",
 				   Storage.size(), ")!");
 		}
 		// copy
@@ -37,7 +37,7 @@ protected:
 			coretools::str::eraseAllWhiteSpaces(s);
 			val = coretools::str::fromString<Type, true>(s);
 		} catch (...) {
-			UERROR("Invalid initial value (", InitVal, ") for parameter ", Name,
+			throw coretools::TUserError("Invalid initial value (", InitVal, ") for parameter ", Name,
 				   "! Should be a number and inside numeric boundaries of that parameter type.");
 		}
 		std::vector<Type> vals(Storage.size(), val);
@@ -50,7 +50,7 @@ protected:
 		try {
 			coretools::str::fillContainerFromString(InitVal, vals, ',', true, true);
 		} catch (...) {
-			UERROR(
+			throw coretools::TUserError(
 				"Invalid initial value (", InitVal, ") for parameter ", Name,
 				"! The vector should only contain numbers that are inside numeric boundaries of that parameter type.");
 		}
@@ -65,7 +65,7 @@ protected:
 				vals.push_back(File.get<Type>(0));
 			}
 		} catch (...) {
-			UERROR("Encountered invalid initial value in file '", File.name(), "' for parameter ", Name,
+			throw coretools::TUserError("Encountered invalid initial value in file '", File.name(), "' for parameter ", Name,
 				   "! (Last valid value: ", vals.back(), ").");
 		}
 		_copyValsToStorage(vals, Storage, Name);
@@ -79,13 +79,13 @@ protected:
 				vals.push_back(File.get<Type>(i));
 			}
 		} catch (...) {
-			UERROR("Encountered invalid initial value in file '", File.name(), "' for parameter ", Name,
+			throw coretools::TUserError("Encountered invalid initial value in file '", File.name(), "' for parameter ", Name,
 				   "! (Last valid value: ", vals.back(), ").");
 		}
 		File.popFront();
 
 		if (!File.empty()) {
-			UERROR("Too many lines in file ", File.name(), " (", File.curLine(), ")! Expected one line.");
+			throw coretools::TUserError("Too many lines in file ", File.name(), " (", File.curLine(), ")! Expected one line.");
 		}
 		_copyValsToStorage(vals, Storage, Name);
 	}
@@ -111,7 +111,7 @@ protected:
 		// 4) read a file with one column
 		// 5) read a file with one row
 		if (!_readValsFromFile_oneColOrRow(Filename, Storage, Name)) { // file format: all in one col
-			UERROR("Invalid file format of ", Filename, ". Expected a file with either 1 or ", Storage.size(),
+			throw coretools::TUserError("Invalid file format of ", Filename, ". Expected a file with either 1 or ", Storage.size(),
 				   " lines.");
 		}
 	}
@@ -139,7 +139,7 @@ protected:
 		if (!found) { found = _readValsFromFile_oneColOrRow(Filename, Storage, Name); }
 
 		if (!found) {
-			UERROR("Invalid file format of ", Filename,
+			throw coretools::TUserError("Invalid file format of ", Filename,
 				   ". Expected a file whose filename contains 'trace', 'simulated', 'meanVar', 'statePosteriors', or "
 				   "then a file with either 1 or ",
 				   Storage.size(), " lines.");

@@ -356,7 +356,7 @@ public:
 				_switchEMLabels();
 			} else {
 				// both are fix -> won't be updated in EM, so var0 should never be larger than var1!
-				DEVERROR("should have never gotten here! If both var0 and var1 are not updated in EM, we shouldn't "
+				throw coretools::TDevError("should have never gotten here! If both var0 and var1 are not updated in EM, we shouldn't "
 						 "switch labels anyways!");
 			}
 		} else {

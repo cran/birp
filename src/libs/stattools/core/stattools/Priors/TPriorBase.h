@@ -123,7 +123,7 @@ public:
 	virtual void initialize() {
 		// only override if there are prior parameters
 		if (!_nodesWithinBox.empty()) {
-			UERROR("The box '", name(), "' contains ", _nodesWithinBox.size(),
+			throw coretools::TUserError("The box '", name(), "' contains ", _nodesWithinBox.size(),
 			       " parameters, but the function "
 			       "'initialize' is not overridden. Please implement this function.");
 		}
@@ -132,7 +132,7 @@ public:
 	virtual void setFixedPriorParameters(std::string_view /*Parameters*/) {
 		// only override if there are no prior parameters
 		if (_nodesWithinBox.empty()) {
-			UERROR("The box '", name(),
+			throw coretools::TUserError("The box '", name(),
 			       "' does not infer any parameters, but the function "
 			       "'setFixedPriorParameters' is not overridden. Please implement this function.");
 		}
@@ -141,7 +141,7 @@ public:
 	virtual void guessInitialValues() {
 		// only override if there are prior parameters
 		if (!_nodesWithinBox.empty()) {
-			UERROR("The box '", name(), "' contains ", _nodesWithinBox.size(),
+			throw coretools::TUserError("The box '", name(), "' contains ", _nodesWithinBox.size(),
 			       " parameters, but the function "
 			       "'guessInitialValues' is not overridden. Please implement this function.");
 		}
@@ -232,7 +232,7 @@ public:
 
 	void addBelow(TNodeBase *Parameter, Storage *Storage) override {
 		if (this->_storageBelow.size() > 0) { // make sure there is only one below for a deterministic box
-			UERROR("A deterministic box (", this->name(),
+			throw coretools::TUserError("A deterministic box (", this->name(),
 			       ") can not be shared among multiple parameters (adding parameter ", Parameter->name(),
 			       " exceeds 1.)");
 		}
@@ -268,8 +268,8 @@ public:
 	using typename TStochasticBase<Derived, Type, NumDim>::Storage;
 	using typename TStochasticBase<Derived, Type, NumDim>::UpdatedStorage;
 
-	double getDensity(const Storage &, size_t) const override { DEVERROR("not implemented."); };
-	double getLogDensityRatio(const UpdatedStorage &, size_t) const override { DEVERROR("not implemented."); };
+	double getDensity(const Storage &, size_t) const override { throw coretools::TDevError("not implemented."); };
+	double getLogDensityRatio(const UpdatedStorage &, size_t) const override { throw coretools::TDevError("not implemented."); };
 };
 
 //-------------------------------------------
@@ -313,7 +313,7 @@ template<typename T> void checkSameDimStorageBelow(const std::vector<T> &Storage
 	auto dim = Storages.front()->dimensions();
 	for (const auto &storage : Storages) {
 		if (storage->dimensions() != dim) {
-			DEVERROR("Mismatch in dimensions of storageBelow in ", Name, ": ", dim, " vs ", storage->dimensions(), "!");
+			throw coretools::TDevError("Mismatch in dimensions of storageBelow in ", Name, ": ", dim, " vs ", storage->dimensions(), "!");
 		}
 	}
 }

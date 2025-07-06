@@ -5,7 +5,6 @@
 #include "TAccept.h"
 
 #include "coretools/Main/TRandomGenerator.h"
-#include <cassert>
 #include <math.h>
 
 namespace coretools {
@@ -26,7 +25,7 @@ bool TAccept::_evaluate_left(const double logQ, const size_t left_bin, const dou
 }
 
 bool TAccept::accept(const double logQ) {
-	assert(logQ <= 0.0);
+	DEBUG_ASSERT(logQ <= 0.0);
 
 	// draw random number (uniform in [0,1])
 	const double x = coretools::instances::randomGenerator().getRand();

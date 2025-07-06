@@ -338,7 +338,7 @@ protected:
 				// don't switch z, we didn't change labels
 			} else {
 				// both M0 and rhos are fix -> should never be changed in EM, and therefore we should never get here!
-				DEVERROR("Should never have gotten here! Both M0 and rho are fix - the condition that M1 must be "
+				throw coretools::TDevError("Should never have gotten here! Both M0 and rho are fix - the condition that M1 must be "
 						 "larger than M0 should never be violated!");
 			}
 		} else {

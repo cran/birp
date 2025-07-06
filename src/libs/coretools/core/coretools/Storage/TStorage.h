@@ -9,6 +9,7 @@
 #include <numeric>
 #include <vector>
 
+#include "coretools/Main/TError.h"
 #include "coretools/Math/TSumLog.h"
 #include "coretools/Storage/TDimension.h"
 #include "coretools/Storage/TNames.h"
@@ -186,8 +187,8 @@ public:
 	constexpr const_reverse_iterator crend() const noexcept { return rend(); }
 
 	void resize(const std::vector<size_t> &dimensions) {
-		assert(dimensions.size() == NumDim);
-		assert(hasDefaultValues() || _innerDimensionsAreEqual(dimensions));
+		DEBUG_ASSERT(dimensions.size() == NumDim);
+		DEBUG_ASSERT(hasDefaultValues() || _innerDimensionsAreEqual(dimensions));
 		// ATTENTION: if values have been filled already, this is a very dangerous function!
 		// you should only change the last entry of the vector of dimensions
 		// -> this does not change the coordinates of the values that have already been filled.
@@ -197,7 +198,7 @@ public:
 	};
 
 	void resize(const std::array<size_t, NumDim> &dimensions) {
-		assert(hasDefaultValues() || _innerDimensionsAreEqual(dimensions));
+		DEBUG_ASSERT(hasDefaultValues() || _innerDimensionsAreEqual(dimensions));
 		// ATTENTION: if values have been filled already, this is a very dangerous function!
 		// you should only change the last entry of the vector of dimensions
 		// -> this does not change the coordinates of the values that have already been filled.
@@ -207,7 +208,7 @@ public:
 	};
 
 	void reserve(const std::array<size_t, NumDim> &dimensions) {
-		assert(hasDefaultValues() || _innerDimensionsAreEqual(dimensions));
+		DEBUG_ASSERT(hasDefaultValues() || _innerDimensionsAreEqual(dimensions));
 		// ATTENTION: if values have been filled already, this is a very dangerous function!
 		// you should only change the last entry of the vector of dimensions
 		// -> this does not change the coordinates of the values that have already been filled.
@@ -225,12 +226,9 @@ public:
 		// after all data have been filled in
 
 		// check if any dimension is = 0 (invalid)
-		if (guessLengthOfUnknownDimension < 1) {
-			DEVERROR("Invalid guess of first (unknown) dimension: Size should "
-			         "be > 0!");
-		}
+		DEV_ASSERT(guessLengthOfUnknownDimension > 0);
 		for (auto &dim : allKnownDimensions) {
-			if (dim == 0) { DEVERROR("Invalid length of dimension vector: Size should be > 0!"); }
+			DEV_ASSERT(dim != 0);
 		}
 
 		// clear previously allocated memory of dimensions
@@ -260,7 +258,7 @@ public:
 
 		// check if integer number
 		if (static_cast<size_t>(lengthFirst) != lengthFirst) {
-			DEVERROR("Error while filling data: Data seems to be ragged. "
+			throw TDevError("Error while filling data: Data seems to be ragged. "
 			         "Expected the total number of data points to "
 			         "be a multiple of ",
 			         totalSizeAllButFirstDim, ", but got a factor of ", lengthFirst, " which is not a integer number.");
@@ -369,7 +367,7 @@ public:
 	// dimension names
 
 	void setDimensionName(const std::shared_ptr<TNamesEmpty> &Name, size_t Dim) {
-		assert(Dim < NumDim);
+		DEBUG_ASSERT(Dim < NumDim);
 		_dimensionNames[Dim] = Name;
 	};
 
@@ -378,13 +376,13 @@ public:
 	const std::array<std::shared_ptr<TNamesEmpty>, NumDim> &getDimensionNames() const { return _dimensionNames; };
 
 	const std::shared_ptr<TNamesEmpty> &getDimensionName(size_t Dim) const {
-		assert(Dim < NumDim);
+		DEBUG_ASSERT(Dim < NumDim);
 		return _dimensionNames[Dim];
 	};
 
 	std::array<std::string, NumDim> getFullDimensionName(const std::array<size_t, NumDim> &Coord) const {
 		// get each name per dimension for specific coordinates -> fill into array
-		assert(NumDim > 0);
+		DEBUG_ASSERT(NumDim > 0);
 		std::array<std::string, NumDim> name;
 		for (size_t dim = 0; dim < NumDim; dim++) { name[dim] = (*_dimensionNames[dim])[Coord[dim]]; }
 		return name;
@@ -393,7 +391,7 @@ public:
 	void appendToVectorOfAllFullDimensionNames(std::vector<std::string> &FullNames,
 	                                           std::string_view Delimiter = "_") const {
 		// fill vector fullNames with full names of all elements of storage
-		assert(NumDim > 0);
+		DEBUG_ASSERT(NumDim > 0);
 
 		for (size_t i = 0; i < size(); ++i) {
 			std::string oneDimName = str::concatenateString(getFullDimensionName(getSubscripts(i)), Delimiter);
@@ -415,7 +413,7 @@ public:
 	void appendToVectorOfAllFullDimensionNamesWithPrefix(std::vector<std::string> &FullNames, std::string_view Prefix,
 	                                                     std::string_view Delimiter = "_") const {
 		// fill vector fullNames with full names of all elements of storage add prefix + Delimiter to each full Name
-		assert(NumDim > 0);
+		DEBUG_ASSERT(NumDim > 0);
 
 		for (size_t i = 0; i < size(); ++i) {
 			FullNames.push_back(getFullDimensionNameWithPrefix(i, Prefix, Delimiter));

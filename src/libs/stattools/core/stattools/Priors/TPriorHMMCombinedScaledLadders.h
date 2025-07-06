@@ -69,14 +69,10 @@ protected:
 
 	auto _fixTransitionMatricesDuringEM() const {
 		size_t sum = _kappa->hasFixedInitialValue() + _nu->hasFixedInitialValue() + _mu->hasFixedInitialValue();
-		if (sum == 0) {
-			return std::vector<bool>(_numChains, false);
-		} else if (sum == 3) {
-			return std::vector<bool>(_numChains, true);
-		} else {
-			UERROR("Error in initialization of ", name(),
-				   " prior: either specify initial values for kappa, nu and mu, or for none of them.");
-		}
+		if (sum == 0) { return std::vector<bool>(_numChains, false); }
+		if (sum == 3) { return std::vector<bool>(_numChains, true); }
+		throw coretools::TUserError("Error in initialization of ", name(),
+									" prior: either specify initial values for kappa, nu and mu, or for none of them.");
 	}
 
 	void _setDefaultValues() {
@@ -111,7 +107,7 @@ protected:
 		// reason: EM. z below passes pointer to itself to this prior, which then runs EM. If there are multiple z,
 		// we would need to find a way to have pointers to both and run the EM on them simultaneously -> not so easy
 		if (this->_storageBelow.size() > 1) {
-			DEVERROR("Can not run EM estimation of prior ", name(), " for ", this->_storageBelow.size(),
+			throw coretools::TDevError("Can not run EM estimation of prior ", name(), " for ", this->_storageBelow.size(),
 					 " parameters. Currently only implemented for 1 parameter.");
 		}
 
@@ -194,7 +190,7 @@ public:
 
 		// make sure that max of parameters below is numStates-1
 		if (Type::max() != _transitionMatrix.numStates() - 1) {
-			DEVERROR("numStates-1 (", _transitionMatrix.numStates() - 1, ") differs from maximum value of Type (",
+			throw coretools::TDevError("numStates-1 (", _transitionMatrix.numStates() - 1, ") differs from maximum value of Type (",
 					 Type::max(), ").");
 		}
 	}

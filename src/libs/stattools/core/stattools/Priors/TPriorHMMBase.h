@@ -222,7 +222,7 @@ protected:
 			std::any_of(params.begin(), params.end(), [](auto param) { return param->hasFixedInitialValue(); });
 
 		if (!allFix && anyFix) {
-			UERROR("Error in initialization of ", this->name(),
+			throw coretools::TUserError("Error in initialization of ", this->name(),
 				   " prior: either specify initial values for both all prior parameters, or for none of them. Don't "
 				   "know how to handle only one!");
 		}
@@ -235,7 +235,7 @@ protected:
 		// reason: EM. z below passes pointer to itself to this prior, which then runs EM. If there are multiple z,
 		// we would need to find a way to have pointers to both and run the EM on them simultaneously -> not so easy
 		if (this->_storageBelow.size() > 1) {
-			DEVERROR("Can not run EM estimation of prior ", Name, " for ", this->_storageBelow.size(),
+			throw coretools::TDevError("Can not run EM estimation of prior ", Name, " for ", this->_storageBelow.size(),
 					 "parameters. Currently only implemented for 1 parameter.");
 		}
 

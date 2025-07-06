@@ -39,7 +39,8 @@ public:
 	bool exists(const T ID) const { return _dist.find(ID) != _dist.end(); };
 
 	const TCountDistribution<TypeValue, TypeCounts, AllowResize> &operator[](const T ID) {
-		if (!exists(ID)) DEVERROR("No entry with key " + str::toString(ID) + " in TCountDistributionMap!");
+		DEV_ASSERT(exists(ID));
+
 		return _dist[ID];
 	};
 };

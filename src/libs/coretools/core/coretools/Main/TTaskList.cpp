@@ -1,5 +1,6 @@
 
 #include "TTaskList.h"
+#include "coretools/Main/TError.h"
 #include "coretools/Strings/stringProperties.h"
 #include "coretools/Strings/stringManipulations.h"
 
@@ -16,7 +17,7 @@ void TTaskList::_throwErrorUnknownTask(std::string_view origTask) const {
 
     // report best unless distance is too high
     if (match.second < origTask.length() - 1){
-        UERROR("Unknown task '", origTask, "'! Did you mean task '", match.first, "'?");
+        throw TUserError("Unknown task '", origTask, "'! Did you mean task '", match.first, "'?");
     } else {
         //if input string is not a task, it might be a file
         //search for possible existence of path in filename
@@ -47,9 +48,9 @@ void TTaskList::_throwErrorUnknownTask(std::string_view origTask) const {
         
         // if lowest file distance is lower than lowest task distance, report that
         if (fileMatch.second < match.second){ 
-            UERROR("Unknown task or file '", origTask, "'! Did you mean file '", additionalPath, fileMatch.first, "'?");
+            throw TUserError("Unknown task or file '", origTask, "'! Did you mean file '", additionalPath, fileMatch.first, "'?");
         } else {
-            UERROR("Unknown task or file '", origTask, "'!");
+            throw TUserError("Unknown task or file '", origTask, "'!");
         }
     }
 }

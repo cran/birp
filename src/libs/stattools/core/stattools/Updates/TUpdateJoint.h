@@ -40,10 +40,10 @@ public:
 
 	void setWeights(const std::array<std::vector<double>, NumDim> & /*Statistics*/,
 	                const std::vector<std::string> & /*Args*/, coretools::Positive /*FracUpdates*/) {
-		DEVERROR("TUpdateJoint is currently not compatible with update weights!");
+		throw coretools::TDevError("TUpdateJoint is currently not compatible with update weights!");
 	}
 	void setWeights(const std::vector<double> & /*Weights*/, coretools::Positive /*FracUpdates*/) {
-		DEVERROR("TUpdateJoint is currently not compatible with update weights!");
+		throw coretools::TDevError("TUpdateJoint is currently not compatible with update weights!");
 	}
 
 	void prepareIteration() {}

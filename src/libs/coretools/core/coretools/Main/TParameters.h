@@ -44,8 +44,8 @@ private:
 			return str::fromString<T, true>(Param);
 		} catch (std::exception &error) {
 			// will also catch TUserError and TDevError since they derive publicly from std::exception
-			UERROR("Failed to parse parameter '", Name, "': ", error.what());
-		} catch (...) { UERROR("Failed to parse parameter '", Name, "'!"); }
+			throw TUserError("Failed to parse parameter '", Name, "': ", error.what());
+		} catch (...) { throw TUserError("Failed to parse parameter '", Name, "'!"); }
 	}
 
 	Map::const_iterator _find(std::string_view Name) const;

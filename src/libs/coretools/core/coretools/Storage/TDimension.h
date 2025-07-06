@@ -5,8 +5,10 @@
 #ifndef TDIMENSION_H
 #define TDIMENSION_H
 
-#include "coretools/algorithms.h"
 #include <array>
+
+#include "coretools/algorithms.h"
+#include "coretools/Main/TError.h"
 
 namespace coretools {
 
@@ -50,7 +52,7 @@ public:
 	TRange(size_t First, size_t Last, size_t Increment) { set(First, Last, Increment); };
 
 	void set(size_t First, size_t Last, size_t Increment) {
-		assert(Last >= First);
+		DEBUG_ASSERT(Last >= First);
 		begin     = First;
 		end       = Last;
 		increment = Increment;
@@ -166,7 +168,7 @@ public:
 	explicit TDimension(const std::array<size_t, NumDim> &dimensions) { init(dimensions); };
 
 	void init(const std::vector<size_t> &dimensions) {
-		assert(dimensions.size() == NumDim);
+		DEBUG_ASSERT(dimensions.size() == NumDim);
 		std::copy(dimensions.begin(), dimensions.end(), _dimensions.begin());
 		// multiplies all dimensions
 		if (NumDim == 0) {
@@ -198,8 +200,7 @@ public:
 
 	TRange getDiagonal() const {
 		static_assert(NumDim == 2);
-		if (_dimensions[0] != _dimensions[1]) // must be square matrix
-			DEVERROR("diagonal is only implemented for square matrices!");
+		DEV_ASSERT(_dimensions[0] == _dimensions[1]);
 		TRange range(0, size(), _dimensions[0] + 1);
 		return range;
 	};
@@ -208,10 +209,7 @@ public:
 		size_t first = getIndex(startCoord);
 		size_t last  = getIndex(endCoord);
 
-		if (startCoord > endCoord)
-			DEVERROR("Start coordinate (", first,
-			         ") in function getRange() corresponds to a larger index in linear array than end coordinate (",
-			         last, ")!");
+		DEV_ASSERT(startCoord <= endCoord);
 		TRange range(first, last + 1, 1); // last + 1, as otherwise we could not access single elements by giving the
 		                                  // same start and end coordinates
 		return range;
@@ -223,7 +221,7 @@ public:
 	};
 
 	TRange get1DSlice(size_t dim, const std::array<size_t, NumDim> &startCoord) const {
-		assert(dim < NumDim);
+		DEBUG_ASSERT(dim < NumDim);
 
 		size_t first                        = getIndex(startCoord);
 		// where's the last?
@@ -241,7 +239,7 @@ public:
 	};
 
 	auto getSlice(size_t dim, size_t indexInDim) const {
-		assert(dim < NumDim);
+		DEBUG_ASSERT(dim < NumDim);
 
 		size_t incInDim = incrementInDim(dim);
 		size_t first    = incInDim * indexInDim;
@@ -292,10 +290,7 @@ public:
 
 	// re-construct index in multi-dimensional array from linear array
 	std::array<size_t, NumDim> getSubscripts(size_t linearIndex) const {
-		// validate index
-		if (linearIndex >= size())
-			DEVERROR("Linear index (", linearIndex,
-			         ") in function getIndexInArray() is larger than total size of array (", size(), ")!");
+		DEV_ASSERT(linearIndex < size());
 
 		return getSubscriptsAsArray(linearIndex, _dimensions);
 	};

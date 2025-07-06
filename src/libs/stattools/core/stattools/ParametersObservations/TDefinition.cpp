@@ -4,6 +4,7 @@
 
 #include "stattools/ParametersObservations/TDefinition.h"
 #include "coretools/Strings/fillContainer.h"
+#include "coretools/Main/TError.h"
 
 namespace stattools {
 
@@ -34,7 +35,7 @@ MCMCProposalKernel stringToProposalKernel(std::string_view String) {
 	for (size_t p = min; p != max; p++) {
 		if (proposalKernelToString(MCMCProposalKernel(p)) == String) { return MCMCProposalKernel(p); }
 	}
-	UERROR("Proposal kernel '", String, "' does not exist!");
+	throw coretools::TUserError("Proposal kernel '", String, "' does not exist!");
 }
 } // end namespace ProposalKernel
 
@@ -54,7 +55,7 @@ std::string MCMCFileToString(MCMCFiles Type) {
 	} else if (Type == MCMCFiles::simulation) {
 		return "simulated";
 	}
-	DEVERROR("Type ", (size_t)Type, " does not exist!");
+	throw coretools::TDevError("Type ", (size_t)Type, " does not exist!");
 }
 
 //--------------------------------------------
@@ -79,7 +80,7 @@ void TDefinition::reSetObserved(std::string_view Observed) {
 	bool observed = coretools::str::fromString<bool, true>(Observed);
 	if (observed != isObserved()) {
 		// changed parameter to observation or vice-versa -> not allowed, throw
-		UERROR("Error when building parameter '", _name, "': Can not change parameter to observation or vice-versa!");
+		throw coretools::TUserError("Error when building parameter '", _name, "': Can not change parameter to observation or vice-versa!");
 	}
 }
 

@@ -76,7 +76,7 @@ std::vector<std::string> paste(const T &first, const U &second, std::string_view
 
 		return ret;
 	} else {
-		DEVERROR("sizes are not multiples oif each other!");
+		throw TDevError("sizes are not multiples oif each other!");
 	}
 };
 }

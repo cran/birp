@@ -284,7 +284,7 @@ protected:
 
 			auto first = std::find_if(Names.cbegin(), Names.cend(), [&name](auto &n) { return name == n; });
 			if (first == Names.cend()) {
-				UERROR("Error while reading file '", _file.name(), "' for initialization of parameter ", paramName,
+				throw coretools::TUserError("Error while reading file '", _file.name(), "' for initialization of parameter ", paramName,
 					   ": Expected name ", name, " for index ", i, " does not exist!");
 			}
 			colIndices[i] = std::distance(Names.cbegin(), first);
@@ -297,7 +297,7 @@ protected:
 		try {
 			val = coretools::str::fromString<Type, true>(str);
 		} catch (...) {
-			UERROR("Invalid initial value '", str, "' in column ", col, " of file '", _file.name(), "' for parameter ",
+			throw coretools::TUserError("Invalid initial value '", str, "' in column ", col, " of file '", _file.name(), "' for parameter ",
 				   paramName, "!");
 		}
 		return val;

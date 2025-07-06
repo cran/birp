@@ -13,6 +13,7 @@
 
 #include "coretools/Distributions/Distributions.h"
 
+#include "coretools/Main/TError.h"
 #include "coretools/Main/TRandomPicker.h"
 #include "coretools/Math/TNumericRange.h"
 #include "coretools/Math/TValueStorage.h"
@@ -74,23 +75,23 @@ private:
 		try {
 			DistrType dist(Param);
 			set(dist, Min, Max);
-		} catch (err::TDevError &err) { UERROR(_formatError(OriginalString, Format, err.error())); }
+		} catch (err::TError &err) { throw TUserError(_formatError(OriginalString, Format, err.what())); }
 	}
 
 	TNumericRange<valueType> _extractRange(std::string_view Orig, std::string_view Range, std::string_view Format) {
 		try {
 			TNumericRange<valueType> range(Range);
 			return range;
-		} catch (std::string &error) { UERROR(_formatError(Orig, Format, error)); }
+		} catch (std::string &error) { throw TUserError(_formatError(Orig, Format, error)); }
 	}
 
 	void _ensureNoRangeIsGiven(std::string_view orig, std::string_view Func, std::string_view format,
 							   std::string_view post) {
 		if (!post.empty()) {
 			if (str::stringContainsAny(post, "[]")) {
-				UERROR(_formatError(orig, format, "Function '", Func, "' does not support a range."));
+				throw TUserError(_formatError(orig, format, "Function '", Func, "' does not support a range."));
 			} else {
-				UERROR(_formatError(orig, format, "Unknown part '", post, "'."));
+				throw TUserError(_formatError(orig, format, "Unknown part '", post, "'."));
 			}
 		}
 	}
@@ -98,9 +99,7 @@ private:
 	void _setFixed(std::string_view orig, std::string_view param, std::string_view post) {
 		const std::string format = str::toString(_distNameFixed, "(value)");
 
-		if (str::stringContains(param, ',')) {
-			UERROR(_formatError(orig, format, "Function '", _distNameFixed, "' only supports a single parameter."));
-		}
+		user_assert(!str::stringContains(param, ','), _formatError(orig, format, "Function '", _distNameFixed, "' only supports a single parameter."));
 
 		_ensureNoRangeIsGiven(orig, _distNameFixed, format, post);
 
@@ -111,9 +110,7 @@ private:
 	void _setUnif(std::string_view orig, std::string_view param, std::string_view post) {
 		const std::string format = str::toString(_distNameUnif, "()[min,max]");
 
-		if (!param.empty()) {
-			UERROR(_formatError(orig, format, "Function '", _distNameUnif, "' can not have parameters."));
-		}
+		user_assert(param.empty(), _formatError(orig, format, "Function '", _distNameUnif, "' can not have parameters."));
 
 		TNumericRange<valueType> range = _extractRange(orig, post, format);
 
@@ -135,9 +132,7 @@ private:
 		// split string by ','
 		std::vector<std::string> tmp;
 		coretools::str::fillContainerFromString(param, tmp, ',');
-		if (tmp.empty()) {
-			UERROR("Failed to parse categorical distribution '", orig, "': No parameter values provided!");
-		}
+		user_assert(!tmp.empty(), "Failed to parse categorical distribution '", orig, "': No parameter values provided!");
 
 		// now parse each bin
 		std::vector<valueType> vals(tmp.size());
@@ -148,7 +143,7 @@ private:
 		for (size_t i = 0; i < tmp.size(); ++i) {
 			const auto pos = tmp[i].find(':');
 			if ((hasFreq && pos == std::string::npos) || (!hasFreq && pos != std::string::npos)) {
-				UERROR("Failed to parse categorical distribution '", orig,
+				throw TUserError("Failed to parse categorical distribution '", orig,
 					   "': Frequencies provided for some but not all values!");
 			}
 			str::fromString<true>(tmp[i].substr(0, pos), vals[i]);
@@ -198,7 +193,7 @@ public:
 		static_assert(std::is_integral_v<underlyingType_t<valueType>>, "Integral type required.");
 
 		if (Values.size() == 0) {
-			DEVERROR("Cannot initialize Categorical Distributions without values!");
+			throw TUserError("Cannot initialize Categorical Distributions without values!");
 		} else if (Values.size() == 1) {
 			set(Values.front());
 		} else {
@@ -206,9 +201,7 @@ public:
 			sort(Values.begin(), Values.end());
 
 			// check if _values does not contain duplicates
-			if (std::adjacent_find(Values.cbegin(), Values.cend()) != Values.cend()) {
-				DEVERROR("Values contains duplicate entries!");
-			}
+			DEV_ASSERT(std::adjacent_find(Values.cbegin(), Values.cend()) == Values.cend());
 
 			_values.reset(new TValueStorageDispersed<valueType>(Values));
 
@@ -223,12 +216,11 @@ public:
 		static_assert(std::is_integral_v<underlyingType_t<valueType>>, "Integral type required.");
 
 		// check if sizes match
-		if (Values.size() != Frequencies.size()) {
-			DEVERROR("Number of probabilities does not match number of values!");
-		}
+		DEV_ASSERT(Values.size() == Frequencies.size());
 
 		// initialize
-		if (Values.size() == 0) { DEVERROR("Cannot initialize Categorical Distributions without values!"); }
+		DEV_ASSERT(Values.size() != 0);
+
 		if (Values.size() == 1) {
 			set(Values.front());
 		} else {
@@ -242,9 +234,7 @@ public:
 			sortContainerByRank(normedFreq, ranks, _frequencies);
 
 			// check if _values does not contain duplicates
-			if (std::adjacent_find(sortedValues.cbegin(), sortedValues.cend()) != sortedValues.cend()) {
-				DEVERROR("Values contain duplicate entries!");
-			}
+			DEV_ASSERT(std::adjacent_find(sortedValues.cbegin(), sortedValues.cend()) == sortedValues.cend());
 
 			// Create value storage and
 			_values.reset(new TValueStorageDispersed<valueType>(sortedValues));
@@ -303,16 +293,12 @@ public:
 		std::string distributionString{orig};
 
 		// extract function name
-		if (!str::stringContains(distributionString, '(')) {
-			UERROR("String '", distributionString,
-				   "' is not a function string: missing '('! Use format 'function(parameters)[min,max]' or "
-				   "'function(parameters)'.");
-		}
-		if (!str::stringContains(distributionString, ')')) {
-			UERROR("String '", distributionString,
-				   "' is not a function string: missing ')'! Use format 'function(parameters)[min,max]' or "
-				   "'function(parameters)'.");
-		}
+		user_assert(str::stringContains(distributionString, '('), "String '", distributionString,
+					"' is not a function string: missing '('! Use format 'function(parameters)[min,max]' or "
+					"'function(parameters)'.");
+		user_assert(str::stringContains(distributionString, ')'), "String '", distributionString,
+					"' is not a function string: missing ')'! Use format 'function(parameters)[min,max]' or "
+					"'function(parameters)'.");
 		std::string func = str::extractBefore(distributionString, '(');
 
 		// extract parameters
@@ -331,23 +317,20 @@ public:
 			std::string format = func + "(parameters)[min,max]";
 
 			// check if there are parameters
-			if (param.empty()) {
-				UERROR(_formatError(orig,
-									std::string{func} + "(parameters)[min,max]' or '" + func +
-										"(parameters)' for distributions without ranges.",
-									"No parameters provided!"));
-			}
+			user_assert(!param.empty(), _formatError(orig,
+													 std::string{func} + "(parameters)[min,max]' or '" + func +
+														 "(parameters)' for distributions without ranges.",
+													 "No parameters provided!"));
 
 			// extract range
-			if (distributionString.front() != '[' || distributionString.back() != ']') {
-				UERROR(_formatError(orig, format, "Range missing!"));
-			}
+			user_assert(distributionString.front() == '[' && distributionString.back() == ']', _formatError(orig, format, "Range missing!"));
+
 			distributionString.erase(0, 1);                               // cut away '['
 			distributionString.erase(distributionString.length() - 1, 1); // cut away ']'
 			valueType min, max;
 			try {
 				str::convertString(distributionString, "Unable to parse range!", min, max);
-			} catch (std::string &error) { UERROR(_formatError(orig, format, error)); }
+			} catch (std::string &error) { throw TUserError(_formatError(orig, format, error)); }
 
 			// create distribution
 			// void _initializeDistribution<distrType>(std::string_view  Param, valueType Min, valueType Max,
@@ -373,7 +356,7 @@ public:
 			else if (func == TGammaModeDistr::name)
 				_initializeDistribution<TGammaModeDistr>(param, min, max, orig, format);
 			else
-				UERROR("Unknown function '", func, "'! Currently supported are ", TExponentialDistr::name, ", ",
+				throw TUserError("Unknown function '", func, "'! Currently supported are ", TExponentialDistr::name, ", ",
 					   TNormalDistr::name, ", ", TPoissonDistr::name, ", ", TBinomialDistr::name, ", ",
 					   TNegativeBinomialDistr::name, ", ", TChiDistr::name, ", ", TChisqDistr::name, ", ",
 					   TParetoDistr::name, ", ", TGammaDistr::name, " and ", TGammaModeDistr::name, ".");

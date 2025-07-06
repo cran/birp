@@ -37,7 +37,7 @@ public:
 
 	// static function for external use
 	static Positive density(Positive x, uint32_t k) {
-		if (k == 0) { DEVERROR("k = 0 not allowed in Chi distribution!"); }
+		DEV_ASSERT(k != 0);
 		// calculates density of a chi distribution
 		const auto kDiv2 = (double)k / 2.;
 		const auto tmp1  = 1. / (pow(2., kDiv2 - 1.) * tgamma(kDiv2));
@@ -46,7 +46,7 @@ public:
 	}
 
 	static double logDensity(Positive x, uint32_t k) {
-		if (k == 0) { DEVERROR("k = 0 not allowed in Chi distribution!"); }
+		DEV_ASSERT(k != 0);
 		// calculates log density of a chi distribution
 		const auto kDiv2 = (double)k / 2.;
 		return -(kDiv2 - 1.) * ln2 - gammaLog(kDiv2) + ((double)k - 1.) * log(x) - (x * x) / 2.;

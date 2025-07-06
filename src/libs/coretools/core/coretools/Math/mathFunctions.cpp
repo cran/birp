@@ -6,13 +6,14 @@
  */
 
 #include "coretools/Math/mathFunctions.h"
+#include "coretools/Main/TError.h"
 
 namespace coretools {
 
 constexpr auto kf_gamma_eps = 1e-14;
 constexpr auto kf_tiny      = 1e-14;
 
-double gammaLog(double x) noexcept {
+double gammaLog(double x) noexcept(noDebug) {
 	// copied (with minor formatting changes) from https://people.sc.fsu.edu/~jburkardt/cpp_src/asa245/asa245.cpp
 	// based on algorithm from:
 	//     Allan Macleod, Algorithm AS 245,
@@ -33,8 +34,8 @@ double gammaLog(double x) noexcept {
 	const double xlge = 510000.0;
 
 	// check interval
-	assert(x >= 0.0);
-	assert(x <= 1.0E+30);
+	DEBUG_ASSERT(x >= 0.0);
+	DEBUG_ASSERT(x <= 1.0E+30);
 
 	// Cases: 0 < x < 0.5 and 0.5 <= x < 1.5
 	if (x < 1.5) {
@@ -95,7 +96,7 @@ double gammaLogStirlingDiff(double x) {
 	// \log(2\pi) + (x-\frac{1}{2})*\log(x) - x copied from
 	// https://github.com/stan-dev/math/blob/develop/stan/math/prim/fun/lgamma_stirling_diff.hpp
 
-	assert(x >= 0.0);
+	DEBUG_ASSERT(x >= 0.0);
 	if (x == 0.0) {
 		return std::numeric_limits<double>::infinity();
 	} else if (x < gammaLog_stirling_diff_useful) {
@@ -118,14 +119,14 @@ double gammaLogStirlingDiff(double x) {
 	}
 }
 
-double diffGammaLog(double a, double b) noexcept {
+double diffGammaLog(double a, double b) noexcept(noDebug) {
 	// calculates:
 	// lnGamma(a) - lnGamma(a + b)
 	// implemented in a numerically stable way to prevent catastrophic cancellation for large values of x or y
 	// inspired from https://github.com/stan-dev/math/blob/develop/stan/math/prim/fun/lbeta.hpp
 
-	assert(a >= 0.0);
-	assert(b >= 0.0);
+	DEBUG_ASSERT(a >= 0.0);
+	DEBUG_ASSERT(b >= 0.0);
 
 	if (std::max(a, b) < gammaLog_stirling_diff_useful) {
 		// both small: calculate as usual
@@ -143,14 +144,14 @@ double diffGammaLog(double a, double b) noexcept {
 	return stirling + stirling_diff;
 }
 
-double betaLog(double a, double b) noexcept {
+double betaLog(double a, double b) noexcept(noDebug) {
 	// calculate log of Beta function:
 	// lnGamma(x) + lnGamma(y) - lnGamma(x + y)
 	// implemented in a numerically stable way to prevent catastrophic cancellation for large values of x or y
 	// copied from https://github.com/stan-dev/math/blob/develop/stan/math/prim/fun/lbeta.hpp
 
-	assert(a >= 0.0);
-	assert(b >= 0.0);
+	DEBUG_ASSERT(a >= 0.0);
+	DEBUG_ASSERT(b >= 0.0);
 
 	const double x = std::min(a, b); // x is the smaller of the two
 	const double y = std::max(a, b);
@@ -442,7 +443,7 @@ double invxlogx(double y) {
 	// From Book Numerical Recipes, pp. 309 (chapter 6.11, Inverse of the Function x log(x))
 	constexpr double ooe = 0.367879441171442322;
 	double t, u, to = 0.;
-	if (y >= 0. || y <= -ooe) DEVERROR("no such inverse value!");
+	DEV_ASSERT(y < 0 && y > -ooe);
 	if (y < -0.2)
 		u = log(ooe - sqrt(2 * ooe * (y + ooe))); // First approximation by inverse of Taylor series.
 	else
@@ -481,7 +482,7 @@ double invComplementaryCumulativeDistrFunction(Probability q) {
 	// Return inverse of the complementary cumulative distribution function.
 	// From Book Numerical Recipes, pp. 334 (chapter 6.14.12, Kolmogorov-Smirnov Distribution)
 
-	if (q == 0.) { DEVERROR("q must be > 0.0 (q = ", q, ")!"); }
+	DEV_ASSERT(q > 0.);
 	if (q == 1.) return 0.;
 	if (q > 0.3) {
 		const double f = -0.392699081698724155 * sqrt(1. - q);

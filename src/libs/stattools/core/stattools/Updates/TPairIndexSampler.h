@@ -254,7 +254,7 @@ public:
 				return std::make_pair(first, second);
 			}
 		}
-		DEVERROR("Failed to find Index ", Index, "!");
+		throw coretools::TDevError("Failed to find Index ", Index, "!");
 	}
 };
 

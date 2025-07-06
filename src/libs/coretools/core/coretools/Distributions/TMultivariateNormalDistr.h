@@ -3,6 +3,7 @@
 
 #include "coretools/arma_include.h"
 #include "coretools/Main/TRandomGenerator.h"
+#include "coretools/Main/TError.h"
 #include "coretools/Types/commonWeakTypes.h"
 
 namespace coretools::probdist {
@@ -97,7 +98,7 @@ public:
 	TMultivariateNormalDistr(TConstView<double> Mu, const arma::mat &Sigma) { set(Mu, Sigma); }
 
 	template<bool AddNoiseDiag = false> void set(TConstView<double> Mu, const arma::mat &Sigma) {
-		assert(_checkDimensions(Mu.size(), Mu, Sigma));
+		DEBUG_ASSERT(_checkDimensions(Mu.size(), Mu, Sigma));
 		_mu.assign(Mu.begin(), Mu.end());
 		_Sigma = Sigma;
 
@@ -117,20 +118,20 @@ public:
 	}
 
 	// static function for external use
-	static Positive density(const TypeX &x, TConstView<double> Mu, const arma::mat &Sigma) noexcept {
+	static Positive density(const TypeX &x, TConstView<double> Mu, const arma::mat &Sigma) noexcept(noDebug) {
 		// calculates density of a multivariate normal distribution
 		const auto k = x.size();
-		assert(_checkDimensions(k, Mu, Sigma));
+		DEBUG_ASSERT(_checkDimensions(k, Mu, Sigma));
 		const double nom   = std::exp(-0.5 * _calcMahalanobis(x, Mu, _calcInvSigma(Sigma)));
 		const double denom = _calcDenomDensity(k, Sigma);
 
 		return nom / denom;
 	}
 
-	static double logDensity(const TypeX &x, TConstView<double> Mu, const arma::mat &Sigma) noexcept {
+	static double logDensity(const TypeX &x, TConstView<double> Mu, const arma::mat &Sigma) noexcept(noDebug) {
 		// calculates log density of a multivariate normal distribution
 		const auto k = x.size();
-		assert(_checkDimensions(k, Mu, Sigma));
+		DEBUG_ASSERT(_checkDimensions(k, Mu, Sigma));
 		const double nom   = -0.5 * _calcMahalanobis(x, Mu, _calcInvSigma(Sigma));
 		const double denom = _calcDenomLogDensity(k, Sigma);
 
@@ -140,7 +141,7 @@ public:
 	static TypeX sample(TConstView<double> Mu, const arma::mat &Sigma) {
 		// according to Numerical Recipes 3rd edition, pp.378
 		const auto K = Mu.size();
-		assert(_checkDimensions(K, Mu, Sigma));
+		DEBUG_ASSERT(_checkDimensions(K, Mu, Sigma));
 
 		// Do Cholesky decomposition to factor Sigma into a left triangular matrix L times its transpose Sigma = LL^T
 		const arma::mat L = arma::chol(Sigma, "lower");
@@ -148,14 +149,14 @@ public:
 	}
 
 	// member functions
-	[[nodiscard]] Positive density(const TypeX &x) const noexcept {
-		assert(x.size() == _mu.size());
+	[[nodiscard]] Positive density(const TypeX &x) const noexcept(noDebug) {
+		DEBUG_ASSERT(x.size() == _mu.size());
 		const double nom = std::exp(-0.5 * _calcMahalanobis(x, _mu, _invSigma));
 
 		return nom / _denom;
 	};
-	[[nodiscard]] double logDensity(const TypeX &x) const noexcept {
-		assert(x.size() == _mu.size());
+	[[nodiscard]] double logDensity(const TypeX &x) const noexcept(noDebug) {
+		DEBUG_ASSERT(x.size() == _mu.size());
 		const double nom = -0.5 * _calcMahalanobis(x, _mu, _invSigma);
 		return nom - _denomLog;
 	};

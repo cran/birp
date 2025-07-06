@@ -7,6 +7,7 @@
 
 #include "coretools/Containers/TNestedIterator.h"
 #include "coretools/Containers/TView.h"
+#include "coretools/Main/TError.h"
 
 namespace coretools {
 
@@ -65,8 +66,8 @@ public:
 
 	bool empty() const noexcept { return size() == 0; }
 	size_t size() const noexcept { return _indices.size()  - 1; }
-	size_t size(size_t i) const noexcept {
-		assert(i < size());
+	size_t size(size_t i) const noexcept(noDebug) {
+		DEBUG_ASSERT(i < size());
 		return _indices[i + 1] - _indices[i];
 	}
 	size_t length() const noexcept { return std::get<0>(_data).size(); }
@@ -129,7 +130,7 @@ public:
 
 	template<size_t I>
 	void push_back(const type<I>& Value) {
-		if (empty()) DEVERROR("Cannot append value to empty nested vector!");
+		DEV_ASSERT(!empty());
 		++_indices.back();
 		std::get<I>(_data).push_back(Value);
 		reserveLength(std::get<I>(_data).capacity());
@@ -138,7 +139,7 @@ public:
 
 	template<size_t I>
 	void push_back(type<I>&& Value) {
-		if (empty()) DEVERROR("Cannot append value to empty nested vector!");
+		DEV_ASSERT(!empty());
 		++_indices.back();
 		std::get<I>(_data).push_back(Value);
 		reserveLength(std::get<I>(_data).capacity());
@@ -147,22 +148,22 @@ public:
 
 	template<size_t I, typename... Args>
 	void emplace_back(Args&&... args) {
-		if (empty()) DEVERROR("Cannot append value to empty nested vector!");
+		DEV_ASSERT(!empty());
 		++_indices.back();
 		std::get<I>(_data).emplace_back(std::forward<Args>(args)...);
 		reserveLength(std::get<I>(_data).capacity());
 		_resizeData();
 	}
 
-	TInner<TNestedVector> get(size_t i) noexcept {
-		assert(i < size());
-		assert(std::get<0>(_data).size() >= _indices[i+1]);
+	TInner<TNestedVector> get(size_t i) noexcept(noDebug) {
+		DEBUG_ASSERT(i < size());
+		DEBUG_ASSERT(std::get<0>(_data).size() >= _indices[i+1]);
 		return TInner<TNestedVector>(this, i);
 	}
 
-	TInner<const TNestedVector> get(size_t i) const noexcept {
-		assert(i < size());
-		assert(std::get<0>(_data).size() >= _indices[i+1]);
+	TInner<const TNestedVector> get(size_t i) const noexcept(noDebug) {
+		DEBUG_ASSERT(i < size());
+		DEBUG_ASSERT(std::get<0>(_data).size() >= _indices[i+1]);
 		return TInner<const TNestedVector>(this, i);
 	}
 
@@ -170,18 +171,18 @@ public:
 	TInner<const TNestedVector> operator[](size_t i) const noexcept { return get(i); }
 
 	template<size_t I>
-	TView<type<I>> get(size_t i) noexcept {
+	TView<type<I>> get(size_t i) noexcept(noDebug) {
 		auto& dataI = std::get<I>(_data);
-		assert(i < size());
-		assert(dataI.size() >= _indices[i+1]);
+		DEBUG_ASSERT(i < size());
+		DEBUG_ASSERT(dataI.size() >= _indices[i+1]);
 		return TView<type<I>>(dataI.data() + _indices[i], dataI.data() + _indices[i + 1]);
 	}
 
 	template<size_t I>
-	TConstView<type<I>> get(size_t i) const noexcept {
+	TConstView<type<I>> get(size_t i) const noexcept(noDebug) {
 		const auto& dataI = std::get<I>(_data);
-		assert(i < size());
-		assert(dataI.size() >= _indices[i+1]);
+		DEBUG_ASSERT(i < size());
+		DEBUG_ASSERT(dataI.size() >= _indices[i+1]);
 		return TConstView<type<I>>(dataI.data() + _indices[i], dataI.data() + _indices[i + 1]);
 	}
 
@@ -316,8 +317,8 @@ public:
 
 	bool empty() const noexcept { return size() == 0; }
 	size_t size() const noexcept { return _indices.size()  - 1; }
-	size_t size(size_t i) const noexcept {
-		assert(i < size());
+	size_t size(size_t i) const noexcept(noDebug) {
+		DEBUG_ASSERT(i < size());
 		return _indices[i + 1] - _indices[i];
 	}
 	size_t length() const noexcept { return _data.size(); }
@@ -367,41 +368,41 @@ public:
 		} else {
 			std::copy(View.begin(), View.end(), std::back_inserter(_data));
 		}
-		assert(_indices.back() == _data.size());
+		DEBUG_ASSERT(_indices.back() == _data.size());
 	}
 
 	void push_back(const Type& Value) {
-		if (empty()) DEVERROR("Cannot append value to empty nested vector!");
+		DEV_ASSERT(!empty());
 		++_indices.back();
 		_data.push_back(Value);
-		assert(_indices.back() == _data.size());
+		DEBUG_ASSERT(_indices.back() == _data.size());
 	}
 
 	void push_back(Type&& Value) {
-		if (empty()) DEVERROR("Cannot append value to empty nested vector!");
+		DEV_ASSERT(!empty());
 		++_indices.back();
 		_data.push_back(std::move(Value));
-		assert(_indices.back() == _data.size());
+		DEBUG_ASSERT(_indices.back() == _data.size());
 	}
 
 	template<typename... Args>
 	void emplace_back(Args&&... args) {
-		if (empty()) DEVERROR("Cannot append value to empty nested vector!");
+		DEV_ASSERT(!empty());
 		++_indices.back();
 		_data.emplace_back(std::forward<Args>(args)...);
-		assert(_indices.back() == _data.size());
+		DEBUG_ASSERT(_indices.back() == _data.size());
 	}
 
-	TView<Type> get(size_t i) noexcept {
-		assert(i < size());
-		assert(_data.size() >= _indices[i+1]);
+	TView<Type> get(size_t i) noexcept(noDebug) {
+		DEBUG_ASSERT(i < size());
+		DEBUG_ASSERT(_data.size() >= _indices[i+1]);
 		return TView<Type>(_data.data() + _indices[i], _data.data() + _indices[i + 1]);
 	}
 	TView<Type> operator[](size_t i) noexcept { return get(i); }
 
-	TConstView<Type> get(size_t i) const noexcept {
-		assert(i < size());
-		assert(_data.size() >= _indices[i+1]);
+	TConstView<Type> get(size_t i) const noexcept(noDebug) {
+		DEBUG_ASSERT(i < size());
+		DEBUG_ASSERT(_data.size() >= _indices[i+1]);
 		return TConstView<Type>(_data.data() + _indices[i], _data.data() + _indices[i + 1]);
 	}
 	TConstView<Type> operator[](size_t i) const noexcept { return get(i); }

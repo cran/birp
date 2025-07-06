@@ -39,8 +39,8 @@ public:
 };
 
 class TNoWriter final : public TWriter {
-	void _write(const void *, size_t, size_t) override { DEVERROR("No Output File was defined!"); };
-	int64_t _tell() const override { DEVERROR("No Output File was defined!"); };
+	void _write(const void *, size_t, size_t) override { throw TDevError("No Output File was defined!"); };
+	int64_t _tell() const override { throw TDevError("No Output File was defined!");};
 
 public:
 	TNoWriter() : TWriter("") {}

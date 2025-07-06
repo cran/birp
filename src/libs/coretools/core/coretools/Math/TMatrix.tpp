@@ -145,8 +145,8 @@ template<typename T> TMatrix<T> TMatrix<T>::operator+(const TMatrix &other) {
 
 // Cumulative addition of this matrix and another
 template<typename T> TMatrix<T> &TMatrix<T>::operator+=(const TMatrix &other) {
-	assert(_rows == other.rows());
-	assert(_cols == other.cols());
+	DEBUG_ASSERT(_rows == other.rows());
+	DEBUG_ASSERT(_cols == other.cols());
 
 	for (size_t i = 0; i < _rows; i++) {
 		for (size_t j = 0; j < _cols; j++) (*this)(i, j) += other(i, j);
@@ -165,8 +165,8 @@ template<typename T> TMatrix<T> TMatrix<T>::operator-(const TMatrix &other) {
 
 // Cumulative subtraction of this matrix and another
 template<typename T> TMatrix<T> &TMatrix<T>::operator-=(const TMatrix &other) {
-	assert(other.rows() == _rows);
-	assert(other.cols() == _cols);
+	DEBUG_ASSERT(other.rows() == _rows);
+	DEBUG_ASSERT(other.cols() == _cols);
 
 	for (size_t i = 0; i < _rows; i++) {
 		for (size_t j = 0; j < _cols; j++) { (*this)(i, j) -= other(i, j); }
@@ -226,7 +226,7 @@ template<typename T> void TMatrix<T>::fillFromMatrix(const TBandMatrix<T> &other
 
 template<typename T> void TMatrix<T>::fillFromProduct(const TMatrix &first, const TMatrix &second) {
 	// left.numCols = right.numRows
-	assert(first.cols() == second.rows());
+	DEBUG_ASSERT(first.cols() == second.rows());
 
 	resize(first.rows(), second.cols(), 0);
 	set(0.);
@@ -337,7 +337,7 @@ template<typename T> TMatrix<T> TMatrix<T>::operator/=(T other) {
 
 // Multiply a matrix with a vector
 template<typename T> std::vector<T> TMatrix<T>::operator*(const std::vector<T> &other) {
-	assert(_cols == other.size());
+	DEBUG_ASSERT(_cols == other.size());
 
 	std::vector<T> result(_rows, 0.);
 
@@ -350,8 +350,8 @@ template<typename T> std::vector<T> TMatrix<T>::operator*(const std::vector<T> &
 
 // Compare matrices
 template<typename T> int TMatrix<T>::numDiffEntries(const TMatrix &other) {
-	assert(other.rows() == _rows);
-	assert(other.cols() == _cols);
+	DEBUG_ASSERT(other.rows() == _rows);
+	DEBUG_ASSERT(other.cols() == _cols);
 
 	int res = 0;
 	for (size_t i = 0; i < _rows; i++) {
@@ -364,7 +364,7 @@ template<typename T> int TMatrix<T>::numDiffEntries(const TMatrix &other) {
 
 // Obtain a vector of the diagonal elements
 template<typename T> std::vector<T> TMatrix<T>::diag_vec() {
-	assert(_rows == _cols);
+	DEBUG_ASSERT(_rows == _cols);
 	std::vector<T> result(this->_rows, 0.0);
 
 	for (size_t i = 0; i < this->_rows; i++) { result[i] = (*this)(i, i); }
@@ -374,12 +374,12 @@ template<typename T> std::vector<T> TMatrix<T>::diag_vec() {
 
 // Add to diagonal
 template<typename T> void TMatrix<T>::addToDiag(T val) {
-	assert(_rows == _cols);
+	DEBUG_ASSERT(_rows == _cols);
 	for (size_t i = 0; i < this->_rows; i++) { (*this)(i, i) += val; }
 }
 
 template<typename T> std::vector<T> TMatrix<T>::row(size_t row) const {
-	assert(row < _rows);
+	DEBUG_ASSERT(row < _rows);
 
 	auto begin  = _mat.begin() + getLinearIndex<size_t, 2>({row, 0}, {_rows, _cols});
 	auto oneRow = std::vector<T>(begin, begin + _cols);
@@ -387,27 +387,27 @@ template<typename T> std::vector<T> TMatrix<T>::row(size_t row) const {
 }
 
 template<typename T> std::vector<T> TMatrix<T>::col(size_t col) const {
-	assert(col < _cols);
+	DEBUG_ASSERT(col < _cols);
 	return this->transpose().row(col);
 }
 
 // Access the individual elements
 template<typename T> T &TMatrix<T>::operator()(size_t row, size_t col) {
-	assert(row < _rows);
-	assert(col < _cols);
+	DEBUG_ASSERT(row < _rows);
+	DEBUG_ASSERT(col < _cols);
 	return _mat[getLinearIndex<size_t, 2>({row, col}, {_rows, _cols})];
 }
 
 // Access the individual elements (const)
 template<typename T> T TMatrix<T>::operator()(size_t row, size_t col) const {
-	assert(row < _rows);
-	assert(col < _cols);
+	DEBUG_ASSERT(row < _rows);
+	DEBUG_ASSERT(col < _cols);
 	return _mat[getLinearIndex<size_t, 2>({row, col}, {_rows, _cols})];
 }
 
 // calculate row sum
 template<typename T> T TMatrix<T>::rowSum(size_t row) const {
-	assert(row < _rows);
+	DEBUG_ASSERT(row < _rows);
 
 	T sum      = 0.;
 	auto start = getLinearIndex<size_t, 2>({row, 0}, {_rows, _cols});
@@ -417,7 +417,7 @@ template<typename T> T TMatrix<T>::rowSum(size_t row) const {
 
 // calculate column sum
 template<typename T> T TMatrix<T>::colSum(size_t col) const {
-	assert(col < _cols);
+	DEBUG_ASSERT(col < _cols);
 
 	T sum = 0.;
 	for (size_t row = 0; row < this->_rows; row++) { sum += operator()(row, col); }
@@ -448,7 +448,7 @@ template<typename T> size_t TMatrix<T>::cols() const { return _cols; }
 
 // Get the number of columns of the matrix
 template<typename T> size_t TMatrix<T>::size() const {
-	assert(_rows == _cols);
+	DEBUG_ASSERT(_rows == _cols);
 	return _rows;
 }
 
@@ -509,7 +509,7 @@ template<typename T> TBandMatrix<T>::TBandMatrix(const TBandMatrix &other, T sca
 
 template<typename T> void TBandMatrix<T>::_initialize(size_t size, size_t bandwidth, T initial) {
 	// set size and bandwidth
-	if (bandwidth > size) DEVERROR("bandwidth is > than size!");
+	DEV_ASSERT(bandwidth <= size);
 	_rows      = size;
 	_cols      = size;
 	_bandwidth = bandwidth;
@@ -562,8 +562,8 @@ template<typename T> size_t TBandMatrix<T>::_getLinearIndex(size_t Diag, size_t 
 
 // Access the individual elements
 template<typename T> T &TBandMatrix<T>::operator()(size_t row, size_t col) {
-	assert(row < this->_rows);
-	assert(col < this->_cols);
+	DEBUG_ASSERT(row < this->_rows);
+	DEBUG_ASSERT(col < this->_cols);
 
 	// re-compute index
 	if (!_onBand(row, col)) { return _zero; }
@@ -572,8 +572,8 @@ template<typename T> T &TBandMatrix<T>::operator()(size_t row, size_t col) {
 
 // Access the individual elements (const)
 template<typename T> T TBandMatrix<T>::operator()(size_t row, size_t col) const {
-	assert(row < this->_rows);
-	assert(col < this->_cols);
+	DEBUG_ASSERT(row < this->_rows);
+	DEBUG_ASSERT(col < this->_cols);
 
 	// re-compute index
 	if (!_onBand(row, col)) { return _zero; }
@@ -581,7 +581,7 @@ template<typename T> T TBandMatrix<T>::operator()(size_t row, size_t col) const 
 }
 
 template<typename T> std::vector<T> TBandMatrix<T>::row(size_t row) const {
-	assert(row < this->_rows);
+	DEBUG_ASSERT(row < this->_rows);
 
 	std::vector<T> result;
 	result.resize(this->_cols);
@@ -590,7 +590,7 @@ template<typename T> std::vector<T> TBandMatrix<T>::row(size_t row) const {
 }
 
 template<typename T> T TBandMatrix<T>::rowSum(size_t row) const {
-	assert(row < this->_rows);
+	DEBUG_ASSERT(row < this->_rows);
 
 	T sum = 0.;
 	for (size_t col = 0; col < this->_cols; col++) sum += (*this)(row, col);
@@ -598,7 +598,7 @@ template<typename T> T TBandMatrix<T>::rowSum(size_t row) const {
 }
 
 template<typename T> T TBandMatrix<T>::colSum(size_t col) const {
-	assert(col < this->_cols);
+	DEBUG_ASSERT(col < this->_cols);
 
 	T sum = 0.;
 	for (size_t row = 0; row < this->_rows; row++) sum += (*this)(row, col);
@@ -606,8 +606,8 @@ template<typename T> T TBandMatrix<T>::colSum(size_t col) const {
 }
 
 template<typename T> T TBandMatrix<T>::atDiag(size_t diag, size_t index) const {
-	assert(diag < _numDiag);
-	assert(index < _lengthOfDiags[diag]);
+	DEBUG_ASSERT(diag < _numDiag);
+	DEBUG_ASSERT(index < _lengthOfDiags[diag]);
 
 	return this->_mat[_getLinearIndex(diag, index)];
 }
@@ -628,7 +628,7 @@ template<typename T> void TBandMatrix<T>::fillFromMatrix(const TBandMatrix<T> &o
 
 template<typename T> void TBandMatrix<T>::fillFromProduct(const TBandMatrix<T> &first, const TBandMatrix<T> &second) {
 	// set dimensions and fill with zeros
-	if (first.size() != second.size()) DEVERROR("provided matrices are of different size!");
+	DEV_ASSERT(first.size() == second.size());
 	resize(first.size(), std::min(first.size(), first.bandwidth() + second.bandwidth()), 0);
 	set(0.); // need this, in case we don't resize!
 
@@ -745,8 +745,8 @@ template<typename T> TBandMatrix<T> TBandMatrix<T>::operator+(const TBandMatrix 
 
 // Cumulative addition of this matrix and another
 template<typename T> TBandMatrix<T> &TBandMatrix<T>::operator+=(const TBandMatrix &other) {
-	assert(_rows == other.rows());
-	assert(_cols == other.cols());
+	DEBUG_ASSERT(_rows == other.rows());
+	DEBUG_ASSERT(_cols == other.cols());
 
 	// if bandwidth of other is larger -> we would need to change size of this-matrix
 	// easier to add this to other, as this does not require resizing
@@ -774,8 +774,8 @@ template<typename T> TBandMatrix<T> TBandMatrix<T>::operator-(const TBandMatrix 
 
 // Cumulative subtraction of this matrix and another
 template<typename T> TBandMatrix<T> &TBandMatrix<T>::operator-=(const TBandMatrix &other) {
-	assert(other.rows() == _rows);
-	assert(other.cols() == _cols);
+	DEBUG_ASSERT(other.rows() == _rows);
+	DEBUG_ASSERT(other.cols() == _cols);
 
 	// if bandwidth of other is larger -> we would need to change size of this-matrix
 	// easier to subtract this to other, as this does not require resizing

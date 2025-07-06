@@ -257,7 +257,7 @@ public:
 			coretools::str::eraseAllWhiteSpaces(propWidth);
 			_proposalWidth = this->_restrictProposalWidth(fromString<UnderlyingType, true>(propWidth));
 		} catch (...) {
-			UERROR("Invalid initial proposal width (", ProposalWidth, ") for parameter ", this->name(),
+			throw coretools::TUserError("Invalid initial proposal width (", ProposalWidth, ") for parameter ", this->name(),
 				   "! Should be a number and inside the numerical boundaries of that parameter.");
 		}
 	}
@@ -347,7 +347,7 @@ public:
 		//         for integers, we need to store cumulative probabilities per proposal width -> memory overhead
 		//          -> if this is a desired feature at some point, one would need to refactor class a bit such
 		//          that these are stored per element
-		if (std::is_integral_v<UnderlyingType>) { DEVERROR("Do not use TUpdateUniqueBase for integer types!"); }
+		if (std::is_integral_v<UnderlyingType>) { throw coretools::TDevError("Do not use TUpdateUniqueBase for integer types!"); }
 
 		_sum.resize(Size, 0);
 		const auto defaultProp = this->_restrictProposalWidth(this->_getDefaultProposalWidth());

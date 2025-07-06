@@ -1,6 +1,7 @@
 #ifndef WEAKTYPE_H_
 #define WEAKTYPE_H_
 
+#include "coretools/Main/TError.h"
 #include "coretools/Strings/fromString.h"
 #include "coretools/Types/skills.h"
 #include "coretools/traits.h"
@@ -31,11 +32,11 @@ protected:
 #endif
 
 	// interval information
-	constexpr void _ensureInterval() const noexcept(!_checkIntervals) {
+	constexpr void _ensureInterval() const noexcept(!_checkIntervals && noDebug) {
 		if constexpr (_checkIntervals) {
-			if (!isInsideInterval()) { DEVERROR("value ", _value, " outside range ", IntervalType::info, "!"); }
+			dev_assert(isInsideInterval(), "value ", _value, " outside range ", IntervalType::info, "!");
 		} else {
-			assert(isInsideInterval()); // always check in debug-mode
+			debug_assert(isInsideInterval(), "value ", _value, " outside range ", IntervalType::info, "!"); // always check in debug-mode
 		}
 	}
 
@@ -56,7 +57,7 @@ public:
 	}
 	explicit constexpr WeakType(std::string_view ValueString)
 	    : _value(str::fromString<Type, true>(ValueString)) { // do string conversion check into Type
-		if (!isInsideInterval()) { UERROR("Value ", _value, " is outside range ", IntervalType::info, "!"); }
+		user_assert(isInsideInterval(), "Value ", _value, " is outside range ", IntervalType::info, "!");
 	}
 
 	// assign

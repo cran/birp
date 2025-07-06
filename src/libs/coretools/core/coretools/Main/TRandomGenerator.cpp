@@ -6,6 +6,7 @@
  */
 
 #include "coretools/Main/TRandomGenerator.h"
+#include "coretools/Main/TError.h"
 
 #include <chrono>
 #include <cmath>
@@ -58,7 +59,7 @@ void TRandomGenerator::setSeed(long addToSeed, bool seedIsFixed) {
 */
 Probability TRandomGenerator::getBetaRandom(StrictlyPositive alpha, StrictlyPositive beta, double a,
                                             double b) {
-	if (b <= a) DEVERROR("Bad shape or range for a beta variate!");
+	DEV_ASSERT(a < b);
 	// Scale to interval [a, b]
 	return P(a + getBetaRandom(alpha, beta) * (b - a));
 }
@@ -84,7 +85,7 @@ Probability TRandomGenerator::getBetaRandom(StrictlyPositive alpha, StrictlyPosi
 // Dirichlet Distribution
 //--------------------------------------------------------
 void TRandomGenerator::fillDirichletRandom(size_t K, StrictlyPositive *alpha, ZeroOneOpen *res) {
-	assert(K > 0);
+	DEBUG_ASSERT(K > 0);
 
 	double sum = 0.0;
 	for (size_t k = 0; k < K; ++k) {

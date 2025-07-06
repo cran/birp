@@ -8,8 +8,8 @@
 #ifndef TVIEW_H_
 #define TVIEW_H_
 
+#include "coretools/Main/TError.h"
 #include "coretools/Types/TSomeProbability.h"
-#include <cassert>
 #include <cstddef>
 #include <iterator>
 #include <type_traits>
@@ -62,21 +62,21 @@ public:
 	size_t size() const noexcept { return _size; };
 	size_t empty() const noexcept { return !_size; };
 
-	Type &front() noexcept {
-		assert(!empty());
+	Type &front() noexcept(noDebug) {
+		DEBUG_ASSERT(!empty());
 		return *_begin;
 	}
-	const Type &front() const noexcept {
-		assert(!empty());
+	const Type &front() const noexcept(noDebug) {
+		DEBUG_ASSERT(!empty());
 		return *_begin;
 	}
 
-	Type &back() noexcept {
-		assert(!empty());
+	Type &back() noexcept(noDebug) {
+		DEBUG_ASSERT(!empty());
 		return *(end() - 1);
 	}
-	const Type &back() const noexcept {
-		assert(!empty());
+	const Type &back() const noexcept(noDebug) {
+		DEBUG_ASSERT(!empty());
 		return *(end() - 1);
 	}
 
@@ -87,13 +87,13 @@ public:
 		return _begin;
 	}
 
-	Type &operator[](size_t i) noexcept {
-		assert(i < size());
+	Type &operator[](size_t i) noexcept(noDebug) {
+		DEBUG_ASSERT(i < size());
 		return _begin[i];
 	}
 
-	const Type &operator[](size_t i) const noexcept {
-		assert(i < size());
+	const Type &operator[](size_t i) const noexcept(noDebug) {
+		DEBUG_ASSERT(i < size());
 		return _begin[i];
 	}
 
@@ -128,14 +128,14 @@ public:
 		return TView(_begin + pos, std::min(count, size() - pos));
 	}
 
-	void remove_prefix(size_t n) noexcept {
-		assert(n <= size());
+	void remove_prefix(size_t n) noexcept(noDebug) {
+		DEBUG_ASSERT(n <= size());
 		_begin += n;
 		_size  -= n;
 	}
 
-	void remove_suffix(size_t n) noexcept {
-		assert(n <= size());
+	void remove_suffix(size_t n) noexcept(noDebug) {
+		DEBUG_ASSERT(n <= size());
 		_size -= n;
 	}
 

@@ -24,7 +24,7 @@ void TChiDistr::set(std::string_view parameterString) {
 };
 
 Positive TChiDistr::density(Positive x) const {
-	if (_k == 0) { DEVERROR("k = 0 not allowed in Chi distribution!"); }
+	DEV_ASSERT(_k != 0);
 	// calculates density of a chi distribution
 	const auto tmp1 = 1. / (pow(2., _kDiv2Minus) * _kDiv2Gamma);
 	const auto tmp2 = pow(x, _kMinus) * exp(-(x * x) / 2.);
@@ -32,7 +32,7 @@ Positive TChiDistr::density(Positive x) const {
 }
 
 double TChiDistr::logDensity(Positive x) const {
-	if (_k == 0) { DEVERROR("k = 0 not allowed in Chi distribution!"); }
+	DEV_ASSERT(_k != 0);
 	// calculates log density of a chi distribution
 	return _kLogDens + _kMinus * log(x) - (x * x) / 2.;
 }

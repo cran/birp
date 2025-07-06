@@ -2,6 +2,7 @@
 #ifndef CONVERTSTRING_H_
 #define CONVERTSTRING_H_
 
+#include "coretools/Main/TError.h"
 #include "coretools/Strings/stringConversions.h"
 #include "coretools/Strings/stringManipulations.h"
 #include "coretools/Strings/fromString.h"
@@ -19,27 +20,28 @@ void convertOneParam(std::string_view String, std::string_view Explanation, size
 	// convert
 	try {
 		fromString<true>(strip(String), Val);
-	} catch (err::TUserError &error) {
-		UERROR("Failed to parse the ", intToNumeralAdjective(Counter + 1), " parameter: ", error.what(), " ",
-			   Explanation);
+	} catch (err::TError &error) {
+		if (error.isDevError()) {
+			throw TDevError(error.what());
+		} else {
+			throw TUserError("Failed to parse the ", intToNumeralAdjective(Counter + 1), " parameter: ", error.what(),
+							 " ", Explanation);
+		}
 	}
 }
 
 inline void convertString(TSplitter<> Spl, std::string_view Explanation, size_t Counter, size_t ExpectedNumArgs) {
 	// termination version
 	// check if we've used entire parameter string
-	if (!Spl.empty()) {
-		UERROR("More parameters (", Counter + 1, ") than expected (", ExpectedNumArgs, ")! ", Explanation);
-	}
+	user_assert(Spl.empty(), "More parameters (", Counter + 1, ") than expected (", ExpectedNumArgs, ")! ", Explanation);
 }
 
 template<class Type, class... Types>
 void convertString(TSplitter<> Spl, std::string_view Explanation, size_t Counter, size_t ExpectedNumArgs, Type &Val,
 				   Types &...Other) {
 	// fill first value from string
-	if (Spl.empty()) {
-		UERROR("Missing parameter: Found ", Counter, ", expected ", ExpectedNumArgs, " parameters. ", Explanation);
-	}
+	user_assert(!Spl.empty(), "Missing parameter: Found ", Counter, ", expected ", ExpectedNumArgs, " parameters. ", Explanation);
+
 	impl::convertOneParam(Spl.front(), Explanation, Counter, Val);
 	Spl.popFront();
 	// recursive call with other values

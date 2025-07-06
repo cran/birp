@@ -56,7 +56,7 @@ protected:
 		auto f_ptr                 = &TOptimizeTransMatLineSearch::_calcQTransitionMatrix;
 		TReturnCode<double> result = lineSearch.findMax(*this, f_ptr, _previousLogKappa, _logInitialStepSize,
 														_initEpsilon, _initMaxIterations, Tau, Xi);
-		if (result.reason() == invalidInput) { DEVERROR(result.message()); }
+		if (result.reason() == invalidInput) { throw coretools::TDevError(result.message()); }
 		if (this->doReport() && Report) { coretools::instances::logfile().list(result.message()); }
 
 		// store MLE to start next EM iteration with this
@@ -134,7 +134,7 @@ public:
 		assert(InitVals.size() == 1);
 		this->fillProbabilities(InitVals, Tau);
 
-		if (InitVals[0] <= 0.0) { DEVERROR("Initial kappa (", InitVals[0], ") must be strictly positive!"); }
+		if (InitVals[0] <= 0.0) { throw coretools::TDevError("Initial kappa (", InitVals[0], ") must be strictly positive!"); }
 		_previousLogKappa = log(InitVals[0]);
 		return {InitVals[0]};
 	};

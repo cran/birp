@@ -47,7 +47,7 @@ public:
 
 	// as in https://en.wikipedia.org/wiki/Negative_binomial_distribution#Cumulative_distribution_function
 	static Probability cumulativeDensity(Positive n, size_t x, Probability p) {
-		if (n <= 0) { DEVERROR("Stopping-time parameter needs to be > 0! (with n = ", n, ")"); }
+		DEV_ASSERT(n > 0);
 		return P(TIncompleteBeta::incompleteBeta((StrictlyPositive)n, x + 1, p));
 	}
 

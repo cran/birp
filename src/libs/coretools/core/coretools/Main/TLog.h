@@ -94,7 +94,8 @@ private:
 	void _startNewTimer() { _timerVec.emplace_back(); }
 
 	std::string _endMostRecentTimer() {
-		if (_timerVec.empty()) { DEVERROR("no timer running!"); }
+		DEV_ASSERT(!_timerVec.empty());
+
 		_timerVec.back().stop();
 		std::string tmp = _timerVec.back().formattedTime();
 		_timerVec.pop_back();
@@ -212,7 +213,8 @@ public:
 		list("Writing log to '", Filename, "'");
 		_filename = Filename;
 		_file.open(_filename.c_str());
-		if (!_file) UERROR("Unable to open logfile '", _filename, "'!");
+
+		user_assert(_file.is_open(), "Unable to open logfile '", _filename, "'!");
 		_isFile              = true;
 		_lastLineStartInFile = _file.tellp();
 	}

@@ -31,7 +31,8 @@ std::string numericToAlphabet(int Index, char Start) {
 
 size_t alphabetIndexToNumeric(std::string_view Input, char Start) {
 	// reverse function of _numericToAlphabet
-	if (Input.empty()) DEVERROR("Input string is empty");
+	DEV_ASSERT(!Input.empty());
+
 	int result = 0;
 	for (const auto &character : Input) {
 		result *= 26;

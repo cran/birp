@@ -365,7 +365,7 @@ public:
 		// check if size of z matches size of parameter
 		for (auto &p : this->_storageBelow) {
 			if (p->size() != _z->size()) {
-				DEVERROR("Size of storage below (" + coretools::str::toString(p->size()) +
+				throw coretools::TDevError("Size of storage below (" + coretools::str::toString(p->size()) +
 						 ") does not match size of z (" + coretools::str::toString(_z->size()) + ")!");
 			}
 		}

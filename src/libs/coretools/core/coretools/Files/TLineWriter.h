@@ -11,10 +11,10 @@
 #include <memory>
 #include <string_view>
 #include <type_traits>
-#include <cassert>
 
 #include "coretools/Files/TWriter.h"
 #include "coretools/Main/TLog.h"
+#include "coretools/Main/TError.h"
 #include "coretools/traits.h"
 
 #ifndef USE_RCPP
@@ -96,7 +96,8 @@ public:
 	}
 
 	void open(TWriter *Writer) {
-		if (isOpen()) UERROR("File '", Writer->name(), "' is already open!");
+		user_assert(!isOpen(), "File '", Writer->name(), "' is already open!");
+
 		_writer.reset(Writer);
 	}
 
@@ -126,7 +127,7 @@ public:
 	}
 
 	TLineWriter &pop(size_t N = 1) {
-		assert(_buffer.size() >= N);
+		DEBUG_ASSERT(_buffer.size() >= N);
 		_buffer.resize(_buffer.size() - N);
 		return *this;
 	}

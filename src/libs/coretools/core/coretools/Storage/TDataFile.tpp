@@ -2,6 +2,7 @@
 // Created by madleina on 20.04.21.
 //
 
+#include "coretools/Main/TError.h"
 #include "coretools/Strings/stringManipulations.h"
 #include <fstream>
 
@@ -44,12 +45,11 @@ template<typename Type, size_t NumDim> TDataWriterBase<Type, NumDim>::TDataWrite
 template<typename Type, size_t NumDim> TDataWriterBase<Type, NumDim>::~TDataWriterBase() { _closeFile(); }
 
 template<typename Type, size_t NumDim> void TDataWriterBase<Type, NumDim>::_openFile() {
-	const auto ending = str::readAfterLast(_filename, '.');
 	_filePointer = new std::ofstream(_filename.c_str());
 	_isOpen = true;
 
 	if (!(*_filePointer) || _filePointer->fail() || !_filePointer->good()) {
-		UERROR("Failed to open file '", _filename, "' for writing!");
+		throw TUserError("Failed to open file '", _filename, "' for writing!");
 	}
 }
 
@@ -217,12 +217,11 @@ template<typename Type, size_t NumDim> TDataReaderBase<Type, NumDim>::~TDataRead
 
 template<typename Type, size_t NumDim> void TDataReaderBase<Type, NumDim>::_openFile() {
 	// check if file is gzipped: ending must be .gz
-	const auto ending = str::readAfterLast(_filename, '.');
 	_filePointer = new std::ifstream(_filename.c_str());
 	_isOpen = true;
 
 	if (!(*_filePointer) || _filePointer->fail() || !_filePointer->good()) {
-		UERROR("Failed to open file '", _filename, "' for reading! Does the file exists?");
+		throw TUserError("Failed to open file '", _filename, "' for reading! Does the file exists?");
 	}
 }
 
@@ -284,7 +283,7 @@ void TDataReaderBase<Type, NumDim>::read(std::string_view Filename, TMultiDimens
 		// we cannot skip & reshuffle etc) -> throw. Developer should create storage that has 2 dimensions
 		// and set the length of the first dimension to one. This will simplify everything greatly - otherwise, I would
 		// have needed to write a big hack.
-		DEVERROR("Class can not read 1D-storage written in one row. Please define storage as having 2 dimensions, and "
+		throw TDevError("Class can not read 1D-storage written in one row. Please define storage as having 2 dimensions, and "
 		         "set the length of the first dimension to 1.");
 	}
 
@@ -331,11 +330,11 @@ template<typename Type, size_t NumDim>
 void TDataReaderBase<Type, NumDim>::_checkDimensionsFromDeveloper(std::vector<size_t> &Dimensions,
                                                                   std::vector<bool> &DimensionsFilled) {
 	if (Dimensions.size() != NumDim) {
-		DEVERROR("Vector DimensionsFromDeveloper of size ", Dimensions.size(),
+		throw TDevError("Vector DimensionsFromDeveloper of size ", Dimensions.size(),
 		         " differs from expected size based on number of dimensions (", NumDim, ").");
 	}
 	if (DimensionsFilled.size() != NumDim) {
-		DEVERROR("Vector DimensionsFilled of size ", DimensionsFilled.size(),
+		throw TDevError("Vector DimensionsFilled of size ", DimensionsFilled.size(),
 		         " differs from expected size based on number of dimensions (", NumDim, ").");
 	}
 }
@@ -365,7 +364,7 @@ void TDataReaderBase<Type, NumDim>::_checkIfBlockSizeCanBeInferred(const std::ve
 	// finally evaluate: is there any delimiter which has >1 unknown dimensions?
 	for (auto &it : numUnknownDimensions_PerDelim) {
 		if (it.second > 1) {
-			DEVERROR("Can not infer dimensions of file ", _filename, ". For delimiter ", it.first, ", ", it.second,
+			throw TDevError("Can not infer dimensions of file ", _filename, ". For delimiter ", it.first, ", ", it.second,
 			         " dimensions are unknown (while at max 1 can be unknown in order to infer dimensions.");
 		}
 	}
@@ -394,7 +393,7 @@ template<typename Type, size_t NumDim> std::vector<std::string> TDataReaderBase<
 	for (size_t row = 0; row < numLines; row++) {
 		std::string line;
 		if (!impl::readUntilDelimiter(_filePointer, line, '\n', _delimiterComment)) {
-			UERROR("Reached end of file ", _filename, " while reading header. Expected ", numLines,
+			throw TDevError("Reached end of file ", _filename, " while reading header. Expected ", numLines,
 			       " header lines, but reached end of file after ", row + 1, " lines!");
 		}
 		fullHeader[row] = line;
@@ -448,7 +447,7 @@ void TDataReaderBase<Type, NumDim>::_countNumberDelims_oneLine(std::string_view 
 			// all other lines: check if the same as first line
 			if (DelimCounter[delim] != count) {
 				std::string delimString = {delim};
-				UERROR("While reading file ", _filename, ": Count for delimiter ", delimString,
+				throw TDevError("While reading file ", _filename, ": Count for delimiter ", delimString,
 				       " has already been set to ", DelimCounter[delim], ", which differs from the length ", count,
 				       " that was inferred based on a subsequent line.");
 			}
@@ -465,7 +464,7 @@ size_t TDataReaderBase<Type, NumDim>::_getProductOverAllDim_WithSameDelim(size_t
 		if (otherDim != Dim && _delimiters[otherDim] == _delimiters[Dim]) {
 			// other dimension with same delimiter
 			if (!DimensionsFilled[otherDim]) {
-				DEVERROR("Should not get here! Dimension ", otherDim, " must be known in order to infer dimension ",
+				throw TDevError("Should not get here! Dimension ", otherDim, " must be known in order to infer dimension ",
 				         Dim, "!");
 			}
 			productAllOtherDimWithSameDelim *= Dimensions[otherDim];
@@ -485,7 +484,7 @@ TDataReaderBase<Type, NumDim>::_removeAllUpperColumns_FromDelimCounter(size_t To
 	for (size_t previousDim = 0; previousDim < Dim; previousDim++) {
 		if (_colNames->nameIsColName(previousDim) && _delimiters[previousDim] != _delimiters[Dim]) {
 			if (!DimensionsFilled[previousDim]) {
-				DEVERROR("Should not get here! Dimension ", previousDim, " must be known in order to infer dimension ",
+				throw TDevError("Should not get here! Dimension ", previousDim, " must be known in order to infer dimension ",
 				         Dim, "!");
 			}
 			countsWithoutRepetition /= Dimensions[previousDim];
@@ -522,11 +521,11 @@ void TDataReaderBase<Type, NumDim>::_finalCheck_InferDimensions(const std::vecto
                                                                 const std::vector<bool> &DimensionsFilled) {
 	for (size_t dim = 1; dim < NumDim; dim++) {
 		if (!DimensionsFilled[dim]) {
-			DEVERROR("Should not get here! Dimension ", dim,
+			throw TDevError("Should not get here! Dimension ", dim,
 			         " is still unknown at the end of parsing header and first lines!");
 		}
 		if (Dimensions[dim] == 0) {
-			DEVERROR("Should not get here! Dimension of ", dim,
+			throw TDevError("Should not get here! Dimension of ", dim,
 			         " is still zero at the end of parsing header and first lines!");
 		}
 	}
@@ -597,7 +596,7 @@ void TDataReaderBase<Type, NumDim>::_translateBlockCoordinates_toIndexInStorage(
 	// check if a dimension is fully omitted -> currently now allowed
 	for (size_t dim = 1; dim < NumDim; dim++) {
 		if (_dimensionsOfStorage[dim] == 0) {
-			DEVERROR("Dimension ", dim, " is fully omitted in file ", _filename,
+			throw TDevError("Dimension ", dim, " is fully omitted in file ", _filename,
 			         ". This feature is currently not implemented.");
 		}
 	}
@@ -659,7 +658,7 @@ void TDataReaderBase<Type, NumDim>::_storeDataInTempVec(std::string_view DataPoi
 	if (KeepLine && _storeCell[ElementInBlock]) {
 		size_t index = _indexCell_inOneBlockStorage[ElementInBlock];
 		if (index >= OneBlock_forStorage.size()) {
-			DEVERROR("Index ", index, " is larger or equal than size of block for storage (",
+			throw TDevError("Index ", index, " is larger or equal than size of block for storage (",
 			         OneBlock_forStorage.size(), ")!");
 		}
 		OneBlock_forStorage[index] = str::fromString<Type, true>(DataPoint);

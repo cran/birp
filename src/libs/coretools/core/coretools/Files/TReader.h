@@ -45,10 +45,10 @@ public:
 };
 
 class TNoReader final : public TReader {
-	size_t _read(void *, size_t, size_t) override { DEVERROR("No Input File was defined!"); }
-	int64_t _tell() const override { DEVERROR("No Input File was defined!"); }
-	void _seek(int64_t) override { DEVERROR("No Input File was defined!"); }
-	bool _eof() const override { DEVERROR("No Input File was defined!"); }
+	size_t _read(void *, size_t, size_t) override { throw TDevError("No Input File was defined!"); }
+	int64_t _tell() const override { throw TDevError("No Input File was defined!"); }
+	void _seek(int64_t) override { throw TDevError("No Input File was defined!"); }
+	bool _eof() const override { throw TDevError("No Input File was defined!"); }
 
 public:
 	TNoReader() : TReader("") {}

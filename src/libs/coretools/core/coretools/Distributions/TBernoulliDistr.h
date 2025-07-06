@@ -36,10 +36,10 @@ public:
 	static LogProbability logDensity(bool x, Probability pi) {
 		// calculates log density of a bernoulli distribution
 		if (x) {
-			if (pi == 0.) { DEVERROR("pi is exactly 0., and log(pi) results in -Inf!"); }
+			dev_assert(pi != 0., "pi is exactly 0., and log(pi) results in -Inf!");
 			return logP(pi);
 		} else {
-			if (pi == 1.) { DEVERROR("pi is exactly 1., and log(1-pi) results in -Inf!"); }
+			dev_assert(pi != 1., "pi is exactly 1., and log(1-pi) results in -Inf!");
 			return logP(pi.complement());
 		}
 	}

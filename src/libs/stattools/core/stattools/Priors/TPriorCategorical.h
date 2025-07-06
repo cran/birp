@@ -62,7 +62,7 @@ protected:
 		// reason: EM. z below passes pointer to itself to this prior, which then runs EM. If there are multiple z,
 		// we would need to find a way to have pointers to both and run the EM on them simultaneously -> not so easy
 		if (this->_storageBelow.size() > 1) {
-			DEVERROR("Can not run EM estimation of prior ", name(), " for ", this->_storageBelow.size(),
+			throw coretools::TDevError("Can not run EM estimation of prior ", name(), " for ", this->_storageBelow.size(),
 					 " parameters. Currently only implemented for 1 parameter.");
 		}
 
@@ -117,7 +117,7 @@ public:
 
 		// check if max of Type below = K-1
 		if (Type::max() != _K - 1) {
-			DEVERROR("K-1 (", _K - 1, ") differs from maximum value of Type (", Type::max(), ").");
+			throw coretools::TDevError("K-1 (", _K - 1, ") differs from maximum value of Type (", Type::max(), ").");
 		}
 	};
 

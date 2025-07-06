@@ -23,6 +23,7 @@ constexpr bool checkIntervals() noexcept {
 #endif
 }
 
+
 //argumentType
 template<size_t I, typename> struct argumentType {};
 
@@ -138,6 +139,31 @@ using underlyingType_t = typename underlyingType<T>::type;
 
 template <typename T1, typename T2>
 constexpr bool isSameUnderlyingType_v = std::is_same_v<coretools::underlyingType_t<T1>, coretools::underlyingType_t<T2>>;
+
+// isTaggable
+template<typename T, typename = void> struct hasIsTaggable : public std::false_type {};
+template<typename T> class hasIsTaggable<T, std::void_t<decltype(std::declval<T>().isTaggable())>> : public std::true_type {};
+template<typename T> constexpr bool hasIsTaggable_v = hasIsTaggable<T>::value;
+
+namespace impl {
+template<typename T> constexpr bool isTaggable() {
+	if constexpr (std::is_floating_point_v<T>) {
+		return true;
+	} else if constexpr (hasIsTaggable_v<T>) {
+		return T::isTaggable();
+	} else {
+		return false;
+	}
+}
+} // namespace impl
+
+	template<typename T> struct isTaggable : public std::integral_constant<bool, impl::isTaggable<T>()> {};
+template<typename T> constexpr bool isTaggable_v = isTaggable<T>::value;
+
+// isScopedEnum
+	template<typename T> struct isScopedEnum : public std::integral_constant<bool, std::is_enum_v<T> && !std::is_convertible_v<T, underlyingType_t<T>>> {};
+template<typename T> constexpr bool isScopedEnum_v = isScopedEnum<T>::value;
+
 
 // SmallestInteger
 template<std::size_t N>

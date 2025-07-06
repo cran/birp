@@ -59,7 +59,7 @@ template<typename T> std::vector<T> readSingleLineIntoVec(std::string_view Filen
 	}
 	file.popFront();
 
-	if (!file.empty()) { DEVERROR("File ", Filename, " does not have one line!"); }
+	if (!file.empty()) { throw coretools::TDevError("File ", Filename, " does not have one line!"); }
 	return vec;
 }
 

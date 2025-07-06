@@ -13,7 +13,7 @@ using coretools::P;
 
 void checkSize(const std::vector<double> &Stats, size_t Size) {
 	if (Stats.size() != Size) {
-		DEVERROR("Size of Stats (", Stats.size(), ") does not match size of dimension (", Size, ")!");
+		throw coretools::TDevError("Size of Stats (", Stats.size(), ") does not match size of dimension (", Size, ")!");
 	}
 }
 
@@ -50,7 +50,7 @@ auto readArgsGeometricUniform(const std::vector<std::string> &Args) {
 			propBest = P(Args[0]);
 			effort   = P(Args[1]);
 		} else {
-			DEVERROR("Invalid arguments to geometric uniform update weights: expected 2, got ", Args.size(), " (", Args,
+			throw coretools::TDevError("Invalid arguments to geometric uniform update weights: expected 2, got ", Args.size(), " (", Args,
 					 ").");
 		}
 	}
@@ -114,7 +114,7 @@ auto readArgsPowerStatePosterior(const std::vector<std::string> &Args) {
 			intercept = P(Args[0]);
 			exponent  = coretools::str::fromStringCheck<double>(Args[1]);
 		} else {
-			DEVERROR("Invalid arguments to power state posterior update weights: expected 2, got ", Args.size(), " (",
+			throw coretools::TDevError("Invalid arguments to power state posterior update weights: expected 2, got ", Args.size(), " (",
 					 Args, ").");
 		}
 	}
@@ -143,7 +143,7 @@ std::vector<double> calculateWeights(UpdateWeights Weights, const std::vector<do
 	case UpdateWeights::geometricUniform: return calculateWeightsGeometricUniform(Stats, Size, Args);
 	case UpdateWeights::log10StatePosterior: return calculateWeightsLog10StatePosterior(Stats, Size, Args);
 	case UpdateWeights::powerStatePosterior: return calculateWeightsPowerStatePosterior(Stats, Size, Args);
-	default: DEVERROR("Should never get here!");
+	default: throw coretools::TDevError("Should never get here!");
 	}
 }
 } // namespace UpdateWeights1D

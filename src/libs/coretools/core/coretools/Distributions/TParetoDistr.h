@@ -1,6 +1,7 @@
 #ifndef DISTRIBUTIONS_TPARETODISTR_H_
 #define DISTRIBUTIONS_TPARETODISTR_H_
 
+#include "coretools/Main/TError.h"
 #include "coretools/Main/TRandomGenerator.h"
 #include "coretools/Types/commonWeakTypes.h"
 
@@ -20,9 +21,10 @@ private:
 	void _precalculateTmpVars();
 
 	static void checkArgs(double x, double locationMu, StrictlyPositive scaleSigma, double shapeXi) {
-		if (x < locationMu) { DEVERROR("Problem calculating density for generalized pareto: x < mu (location)!"); }
+		DEV_ASSERT(locationMu <= x);
+
 		if (shapeXi < 0.0 && x > locationMu - scaleSigma / shapeXi) {
-			DEVERROR("Problem calculating density for generalized pareto: x > mu - sigma/xi!");
+			throw TDevError("Problem calculating density for generalized pareto: x > mu - sigma/xi!");
 		}
 	}
 
@@ -72,10 +74,8 @@ public:
 	}
 
 	static double mean(double locationMu, StrictlyPositive scaleSigma, double shapeXi) {
-		if (shapeXi < 1)
-			return locationMu + (scaleSigma / (1 - shapeXi));
-		else
-			DEVERROR("Problem calculating mean for generalized pareto: xi >= 1!");
+		DEV_ASSERT(shapeXi < 1);
+		return locationMu + (scaleSigma / (1 - shapeXi));
 	}
 
 	static double sample(double locationMu, StrictlyPositive scaleSigma, double shapeXi) {

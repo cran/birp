@@ -14,6 +14,7 @@
 #include <string>
 
 #include "coretools/Strings/toString.h"
+#include "coretools/macros.h"
 
 namespace coretools::devtools {
 
@@ -79,24 +80,13 @@ public:
 
 } // namespace coretools::devtools
 
-#define _STR_HELPER(...) #__VA_ARGS__
-#define STR(...)         _STR_HELPER(__VA_ARGS__)
-
-#define _MERGE_HELPER(a, b) a##b
-#define MERGE(a, b)         _MERGE_HELPER(a, b)
-
 #ifndef DEV_NO_LOCATION
-#define __FILE_LINE__ __FILE__ ":" STR(__LINE__) ": "
+#define __FILE_LINE__ __FILE__ ":" STRINGIFY(__LINE__) ": "
 #else
 #define __FILE_LINE__ "\t"
 #endif
 
-#define EXPAND(x) x
-#define FIRST(X1, ...) X1
-#define REST(X1, ...) __VA_ARGS__
-
-
-#define OUT(...) coretools::devtools::devOut(__FILE_LINE__, __PRETTY_FUNCTION__, STR(__VA_ARGS__), __VA_ARGS__)
+#define OUT(...) coretools::devtools::devOut(__FILE_LINE__, __PRETTY_FUNCTION__, STRINGIFY(__VA_ARGS__), __VA_ARGS__)
 
 #define ECHO(s) coretools::devtools::devOut(__FILE_LINE__, __PRETTY_FUNCTION__, s)
 #define WINK() ECHO(";-)")

@@ -1,6 +1,7 @@
 #ifndef DISTRIBUTIONS_TDIRICHLETDISTR_H_
 #define DISTRIBUTIONS_TDIRICHLETDISTR_H_
 
+#include "coretools/Main/TError.h"
 #include "coretools/Main/TRandomGenerator.h"
 #include "coretools/Math/mathFunctions.h"
 #include "coretools/Types/commonWeakTypes.h"
@@ -35,8 +36,8 @@ private:
 	}
 
 	static double calcProduct(TConstView<ZeroOpenOneClosed> x, TConstView<StrictlyPositive> alpha) {
-		assert(checkSumX(x));
-		assert(x.size() == alpha.size());
+		DEBUG_ASSERT(checkSumX(x));
+		DEBUG_ASSERT(x.size() == alpha.size());
 
 		// calculates prod_k x_k^(alpha_k - 1)
 		size_t K    = alpha.size();
@@ -46,8 +47,8 @@ private:
 	}
 
 	static double calcLogProduct(TConstView<ZeroOpenOneClosed> x, TConstView<StrictlyPositive> alpha) {
-		assert(checkSumX(x));
-		assert(x.size() == alpha.size());
+		DEBUG_ASSERT(checkSumX(x));
+		DEBUG_ASSERT(x.size() == alpha.size());
 
 		// calculates log(prod_k x_k^(alpha_k - 1)) = sum_k (alpha_k - 1) * log(x_k)
 		size_t K   = alpha.size();

@@ -38,7 +38,7 @@ private:
 protected:
 	void _checkDim(size_t I_from_X) const {
 		if (_I != I_from_X) {
-			UERROR(name(), ": Number of rows of Y (", _I, ") must match the number of rows of X (", I_from_X, ")!");
+			throw coretools::TUserError(name(), ": Number of rows of Y (", _I, ") must match the number of rows of X (", I_from_X, ")!");
 		}
 	}
 

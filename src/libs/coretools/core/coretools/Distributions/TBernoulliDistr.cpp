@@ -21,10 +21,10 @@ void TBernoulliDistr::set(std::string_view parameterString) {
 LogProbability TBernoulliDistr::logDensity(bool x) const {
 	// calculates log density of a bernoulli distribution
 	if (x) {
-		if (_pi == 0.) { DEVERROR("pi is exactly 0., and log(pi) results in -Inf!"); }
+		DEV_ASSERT(_pi != 0.);
 		return _logPi;
 	} else {
-		if (_pi == 1.) { DEVERROR("pi is exactly 1., and log(1-pi) results in -Inf!"); }
+		DEV_ASSERT(_pi != 1.);
 		return _logPiComplement;
 	}
 }

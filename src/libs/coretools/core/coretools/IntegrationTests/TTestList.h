@@ -6,6 +6,7 @@
 #define TTESTLIST_H
 
 #include "coretools/IntegrationTests/TTest.h"
+#include "coretools/Main/TError.h"
 
 namespace coretools {
 
@@ -66,18 +67,18 @@ public:
 		}
 	}
 
-	size_t size() { return testsToPerform.size(); };
+	size_t size() { return testsToPerform.size(); }
 
 	void printTestToLogfile() {
 		for (auto &it : testsToPerform) { instances::logfile().list(it->name()); }
-	};
+	}
 
 	TTest *operator[](size_t num) {
 		if (num < testsToPerform.size())
 			return testsToPerform[num];
 		else
-			DEVERROR("Test number out of range!");
-	};
+			throw TDevError("Test number out of range!");
+	}
 };
 
 }; // namespace coretools

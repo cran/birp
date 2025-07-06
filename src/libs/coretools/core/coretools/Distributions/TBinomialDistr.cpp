@@ -54,19 +54,19 @@ void TBinomialDistr::set(std::string_view parameterString) {
 
 Probability TBinomialDistr::density(size_t k) const {
 	// calculates density of a binomial distribution
-	if (k > _trials) { DEVERROR("n > k in binomial distribution (with n = ", _trials, ", k = ", k, ")!"); }
+	DEV_ASSERT(k <= _trials);
 	return P(choose(_trials, k) * pow(_prob, (double)k) * pow(_ProbComplement, (double)_trials - (double)k));
 }
 
 LogProbability TBinomialDistr::logDensity(size_t k) const {
 	// calculates log density of a binomial distribution
-	if (k > _trials) { DEVERROR("n > k in binomial distribution (with n = ", _trials, ", k = ", k, ")!"); }
+	DEV_ASSERT(k <= _trials);
 	return logP(chooseLog(_trials, k) + (double)k * _logProb + ((double)_trials - (double)k) * _logProbComplement);
 }
 
 Probability TBinomialDistr::cumulativeDensity(size_t k) const {
+	DEV_ASSERT(k <= _trials);
 	if (_trials == k) { return P(1.0); }
-	if (k > _trials) { DEVERROR("n > k in binomial distribution (with n = ", _trials, ", k = ", k, ")!"); }
 	return P(1 - TIncompleteBeta::incompleteBeta(k + 1, _trials - k, _prob));
 }
 
@@ -134,13 +134,13 @@ void TBinomialDistrVariableN::set(std::string_view parameterString) {
 
 Probability TBinomialDistrVariableN::density(size_t n, size_t k) const {
 	// calculates density of a binomial distribution
-	if (k > n) { DEVERROR("n > k in binomial distribution (with n = ", n, ", k = ", k, ")!"); }
+	DEV_ASSERT(k <= n);
 	return P(choose(n, k) * pow(_prob, (double)k) * pow(_ProbComplement, (double)n - (double)k));
 }
 
 LogProbability TBinomialDistrVariableN::logDensity(size_t n, size_t k) const {
 	// calculates log density of a binomial distribution
-	if (k > n) { DEVERROR("n > k in binomial distribution (with n = ", n, ", k = ", k, ")!"); }
+	DEV_ASSERT(k <= n);
 	return logP(chooseLog(n, k) + (double)k * _logProb + ((double)n - (double)k) * _logProbComplement);
 }
 

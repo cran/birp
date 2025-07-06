@@ -31,14 +31,14 @@ public:
 		static_assert(WithMissingData);
 		// check if sizes match
 		if (_data.size() != _isMissing.size()) {
-			DEVERROR("Number of replicates of data (", _data.size(), ") does not match isMissing (", _isMissing.size(),
+			throw coretools::TDevError("Number of replicates of data (", _data.size(), ") does not match isMissing (", _isMissing.size(),
 					 ")!");
 		}
 		for (const auto &it : _isMissing) {
-			if (it.size() != N) { DEVERROR("Size of isMissing (", it.size(), ") does not match N (", N, ")!"); };
+			if (it.size() != N) { throw coretools::TDevError("Size of isMissing (", it.size(), ") does not match N (", N, ")!"); };
 			if (coretools::containerSum(it) ==
 				_isMissing.size()) { // at least one data point must not be missing per replicate
-				DEVERROR("All data are missing for a replicate!");
+				throw coretools::TDevError("All data are missing for a replicate!");
 			}
 		}
 	}

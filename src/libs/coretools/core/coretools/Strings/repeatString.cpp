@@ -9,15 +9,15 @@ namespace coretools::str {
 bool addRepeatedIndexIfRepeated(std::string_view orig, std::vector<std::string> &vec) {
 	std::string::size_type pos = orig.find_last_of('{');
 	if (pos != std::string::npos && pos != 0) {
-		if (orig.find_first_of('{') != pos) UERROR("Multiple '{' characters in string to repeat '", orig, "'!");
-		if (orig.find_last_of('}') != orig.size() - 1) UERROR("String to repeat '", orig, "' does not end with '}'!");
+		if (orig.find_first_of('{') != pos) throw TUserError("Multiple '{' characters in string to repeat '", orig, "'!");
+		if (orig.find_last_of('}') != orig.size() - 1) throw TUserError("String to repeat '", orig, "' does not end with '}'!");
 		if (orig.find_first_of('[') != std::string::npos)
-			UERROR("String to repeat '", orig, "' contains a conflicting '[' character!");
+			throw TUserError("String to repeat '", orig, "' contains a conflicting '[' character!");
 		if (orig.find_first_of(']') != std::string::npos)
-			UERROR("String to repeat '", orig, "' contains a conflicting ']' character!");
+			throw TUserError("String to repeat '", orig, "' contains a conflicting ']' character!");
 		auto tmp = orig.substr(0, pos);
 		int len         = fromString<int, true>(orig.substr(pos + 1, orig.size() - pos - 2));
-		if (len <= 0) UERROR("Request to repeat string '", orig, "' zero times!");
+		if (len <= 0) throw TUserError("Request to repeat string '", orig, "' zero times!");
 		for (int i = 1; i <= len; ++i) vec.emplace_back(tmp);
 		return true;
 	} else
@@ -39,13 +39,13 @@ void addExpandedIndex(std::vector<std::string> &Vec, std::string_view Prefix, in
 bool addExpandedIndexIfToExpand(std::string_view orig, std::vector<std::string> &vec) {
 	std::string::size_type pos = orig.find_last_of('[');
 	if (pos != std::string::npos) {
-		if (orig.find_first_of('[') != pos) UERROR("Multiple '[' characters in string to expand '", orig, "'!");
+		if (orig.find_first_of('[') != pos) throw TUserError("Multiple '[' characters in string to expand '", orig, "'!");
 		std::string::size_type pos2 = orig.find_last_of(']');
-		if (pos2 == std::string::npos) UERROR("Missing closing ']' in string to expand '", orig, "'!");
-		if (orig.find_first_of(']') != pos2) UERROR("Multiple ']' characters in string to expand '", orig, "'!");
-		if (pos2 < pos) UERROR("Unable to understand string to expand '", orig, "': wrong order of '[' and ']'!");
+		if (pos2 == std::string::npos) throw TUserError("Missing closing ']' in string to expand '", orig, "'!");
+		if (orig.find_first_of(']') != pos2) throw TUserError("Multiple ']' characters in string to expand '", orig, "'!");
+		if (pos2 < pos) throw TUserError("Unable to understand string to expand '", orig, "': wrong order of '[' and ']'!");
 		int len = fromString<int>(orig.substr(pos + 1, pos2 - pos));
-		if (len <= 0) UERROR("Request to expand string '", orig, "' zero times!");
+		if (len <= 0) throw TUserError("Request to expand string '", orig, "' zero times!");
 		addExpandedIndex(vec, orig.substr(0, pos), len, orig.substr(pos2 + 1));
 		return true;
 	} else
@@ -84,7 +84,7 @@ void addRepeatedAndExpandedIndexesOfSub(std::string_view orig, std::vector<std::
 		addRepeatedAndExpandIndexes(*it, tmpVec[i]);
 		if (tmpVec[i].size() > 1) {
 			if (times > 1) {
-				if (tmpVec[i].size() != times) UERROR("Unequal number of expansions / repeats in '", orig, "'!");
+				if (tmpVec[i].size() != times) throw TUserError("Unequal number of expansions / repeats in '", orig, "'!");
 			} else
 				times = tmpVec[i].size();
 		}

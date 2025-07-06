@@ -1,6 +1,7 @@
 #ifndef CORETOOLS_CONTAINERS_TLAZYITERATOR_H
 #define CORETOOLS_CONTAINERS_TLAZYITERATOR_H
 
+#include "coretools/Main/TError.h"
 #include <iterator>
 
 namespace coretools {
@@ -17,27 +18,27 @@ public:
 
 	constexpr TLazyIterator(LazyContainer *Container = nullptr) : _container(Container) {}
 
-	constexpr reference operator*() const {
-		assert(_container);
+	constexpr reference operator*() const noexcept(noDebug) {
+		DEBUG_ASSERT(_container);
 		return _container->front();
 	}
 
-	constexpr TLazyIterator &operator++() {
-		assert(_container);
+	constexpr TLazyIterator &operator++() noexcept(noDebug) {
+		DEBUG_ASSERT(_container);
 		_container->popFront();
 		return *this;
 	}
 
-	constexpr value_type operator++(int) {
-		assert(_container);
+	constexpr value_type operator++(int) noexcept(noDebug) {
+		DEBUG_ASSERT(_container);
 		const value_type r = _container->front();
 		_container->popFront();
 		return r;
 	}
 
 	// Does not actually do any comparison. Only used to check for end
-	constexpr bool operator!=(TLazyIterator) const noexcept {
-		assert(_container);
+	constexpr bool operator!=(TLazyIterator) const noexcept(noDebug) {
+		DEBUG_ASSERT(_container);
 		return !_container->empty();
 	}
 };

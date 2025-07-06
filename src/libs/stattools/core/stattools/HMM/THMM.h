@@ -104,7 +104,7 @@ protected:
 
 		// ensure capacity
 		int dist = Last - First;
-		if (dist < 1) { DEVERROR("distance between First and Last is < 1!"); }
+		if (dist < 1) { throw coretools::TDevError("distance between First and Last is < 1!"); }
 
 		// calculate first alpha
 		THMMEmission<PrecisionType, NumStatesType> emission(_EMPrior.numStates());

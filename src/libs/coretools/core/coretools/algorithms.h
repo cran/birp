@@ -47,7 +47,7 @@ template<typename Container> std::vector<size_t> rankSort(const Container &input
 
 template<typename ContainerIn, typename I, typename ContainerOut>
 void sortContainerByRank(const ContainerIn &input, const std::vector<I> &ranks, ContainerOut &output) {
-	assert(input.size() == ranks.size());
+	DEBUG_ASSERT(input.size() == ranks.size());
 
 	output.resize(input.size());
 	std::transform(ranks.begin(), ranks.end(), output.begin(), [&](std::size_t i) { return input[i]; });
@@ -107,7 +107,7 @@ template<typename Container> size_t numNonZero(const Container &vs) {
 
 template<typename Container1, typename Container2>
 double weightedSum(const Container1 &values, const Container2 &weights) {
-	assert(values.size() == weights.size());
+	DEBUG_ASSERT(values.size() == weights.size());
 	return std::inner_product(values.begin(), values.end(), weights.begin(), 0.);
 }
 
@@ -119,7 +119,7 @@ template<typename Container> double sumOfSquares(const Container &vs) { return s
 
 template<typename Container1, typename Container2> void pairwiseSum(Container1 &v1, const Container2 &v2) {
 	// adds each element of v2 to corresponding element in v1 (pairwise)
-	assert(v1.size() == v2.size());
+	DEBUG_ASSERT(v1.size() == v2.size());
 	std::transform(v1.begin(), v1.end(), v2.cbegin(), v1.begin(), std::plus<typename Container1::value_type>());
 }
 
@@ -198,7 +198,7 @@ template<typename Container> double sd(const Container &vs) { return sqrt(meanVa
 
 template<typename Container> double sumPairwiseProduct(const Container &first, const Container second) { 
 	// returns first[0]*second[0] + first[1]*second[1] + ...
-	assert(first.size() == second.size());
+	DEBUG_ASSERT(first.size() == second.size());
 	double sum = 0.0;
 	 for (size_t i = 0; i < first.size(); ++i){
      	sum += first[i] * second[i];
@@ -208,7 +208,7 @@ template<typename Container> double sumPairwiseProduct(const Container &first, c
 
 template<typename Container> double pearsonCorrelation(const Container &first, const Container second) { 
 	// return the Pearson correlation
-	assert(first.size() == second.size());
+	DEBUG_ASSERT(first.size() == second.size());
 	auto meanVarFirst = meanVar(first);
 	auto meanVarSecond = meanVar(second);
 	double E_XY = sumPairwiseProduct(first, second) / (double) first.size();
@@ -218,7 +218,7 @@ template<typename Container> double pearsonCorrelation(const Container &first, c
 
 template<typename Container> double spearmanCorrelation(const Container &first, const Container second) { 
 	// return the Pearson correlation
-	assert(first.size() == second.size());
+	DEBUG_ASSERT(first.size() == second.size());
 	
 	// calculate ranks
 	auto ranksFirst = ranks(first);
@@ -357,7 +357,7 @@ template<typename Container> void standardizeZeroMeanUnitVar(Container &vs) {
 
 template<typename Container1, typename Container2> double euclideanDistance(const Container1 &x, const Container2 &y) {
 	// calculate Euclidean distance: sqrt(sum_{d=1}^D (x_d-y_d)^2)
-	assert(x.size() == y.size());
+	DEBUG_ASSERT(x.size() == y.size());
 	return sqrt(std::inner_product(x.cbegin(), x.cend(), y.cbegin(), 0., std::plus<>{}, [](auto xi, auto yi) {
 		auto d = xi - yi;
 		return d * d;
@@ -471,13 +471,11 @@ size_t binarySearch_getIndex(ForwardIterator First, ForwardIterator Last, const 
 	// do binary search and return index of matching element
 	// throws runtime error if there is no match
 	// note: if there are duplicates, the index of the first matching element is returned
-	auto it = std::lower_bound(First, Last, Value);
-	if (it == Last || *it != Value) {
-		DEVERROR("In function 'binarySearch_getIndex': Failed to find Value '", Value, "'!");
-	} else {
-		size_t index = std::distance(First, it);
-		return index;
-	}
+	const auto it = std::lower_bound(First, Last, Value);
+	DEV_ASSERT(it != Last && *it == Value);
+
+	size_t index = std::distance(First, it);
+	return index;
 };
 
 /* *
@@ -496,8 +494,8 @@ template<typename ContainerTypeCoord, typename ContainerTypeDimensions,
          typename Type = typename ContainerTypeCoord::value_type>
 Type getLinearIndex(const ContainerTypeCoord &Coord, const ContainerTypeDimensions &Dimensions) {
 	// check if size matches and if coordinates are within dimensions
-	assert(Coord.size() == Dimensions.size());
-	assert(([Dimensions = std::as_const(Dimensions), &Coord = std::as_const(Coord)]() constexpr {
+	DEBUG_ASSERT(Coord.size() == Dimensions.size());
+	DEBUG_ASSERT(([Dimensions = std::as_const(Dimensions), &Coord = std::as_const(Coord)]() constexpr {
 		for (size_t i = 0; i < Dimensions.size(); i++) {
 			if (Coord[i] >= Dimensions[i]) { return false; }
 		}
@@ -539,7 +537,7 @@ Type getLinearIndex(const ContainerTypeCoord &Coord, const ContainerTypeDimensio
 template<typename Type, size_t NumDim>
 constexpr Type getLinearIndex(const std::array<Type, NumDim> &Coord, const std::array<Type, NumDim> &Dimensions) {
 	// check if size matches and if coordinates are within dimensions
-	assert(([Dimensions = std::as_const(Dimensions), &Coord = std::as_const(Coord)]() constexpr {
+	DEBUG_ASSERT(([Dimensions = std::as_const(Dimensions), &Coord = std::as_const(Coord)]() constexpr {
 		for (size_t i = 0; i < Dimensions.size(); i++) {
 			if (Coord[i] >= Dimensions[i]) { return false; }
 		}
@@ -579,8 +577,8 @@ constexpr Type getLinearIndex(const std::array<Type, NumDim> &Coord, const std::
 template<typename Type>
 Type getLinearIndexColMajor(const std::vector<Type> &Coord, const std::vector<Type> &Dimensions) {
 	// check if size matches and if coordinates are within dimensions
-	assert(Coord.size() == Dimensions.size());
-	assert(([Dimensions = std::as_const(Dimensions), &Coord = std::as_const(Coord)]() constexpr {
+	DEBUG_ASSERT(Coord.size() == Dimensions.size());
+	DEBUG_ASSERT(([Dimensions = std::as_const(Dimensions), &Coord = std::as_const(Coord)]() constexpr {
 		for (size_t i = 0; i < Dimensions.size(); i++) {
 			if (Coord[i] >= Dimensions[i]) { return false; }
 		}
@@ -623,7 +621,7 @@ template<typename Type> std::vector<Type> getSubscripts(Type LinearIndex, const 
 	// https://stackoverflow.com/questions/46782444/how-to-convert-a-linear-index-to-subscripts-with-support-for-negative-strides
 
 	// check if index is within dimensions
-	assert(LinearIndex < containerProduct(Dimensions));
+	DEBUG_ASSERT(LinearIndex < containerProduct(Dimensions));
 
 	// write out 1, 2 and 3 dimensions for speed
 	switch (Dimensions.size()) {
@@ -683,7 +681,7 @@ std::array<Type, NumDim> getSubscriptsAsArray(Type LinearIndex, const std::array
 	// https://stackoverflow.com/questions/46782444/how-to-convert-a-linear-index-to-subscripts-with-support-for-negative-strides
 
 	// check if index is within dimensions
-	assert(LinearIndex < containerProduct(Dimensions));
+	DEBUG_ASSERT(LinearIndex < containerProduct(Dimensions));
 
 	// write out 1, 2 and 3 dimensions for speed
 	if constexpr (NumDim == 1) {
@@ -732,7 +730,7 @@ std::array<Type, NumDim> getSubscriptsAsArray(Type LinearIndex, const std::array
 
 template<typename Type> std::vector<Type> getSubscriptsColMajor(Type LinearIndex, const std::vector<Type> &Dimensions) {
 	// check if index is within dimensions
-	assert(LinearIndex < containerProduct(Dimensions));
+	DEBUG_ASSERT(LinearIndex < containerProduct(Dimensions));
 
 	// write out 1, 2 and 3 dimensions for speed
 	switch (Dimensions.size()) {

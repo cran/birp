@@ -85,9 +85,8 @@ void TParameters::_parseArgsWithSpace(std::vector<std::string>::iterator it,
 			if (previousParamWasFlagged || stringStartsWith(*it, "--")) {
 				// all ok
 			} else
-				UERROR("Specify all arguments either as '--arg val' OR as 'arg=val', but don't mix these two options! "
-				       "(Argument '",
-				       *it, "' contains a =).");
+				throw TUserError("Specify all arguments either as '--arg val' OR as 'arg=val', but don't mix these two options! "
+					   "(Argument '", *it, "' contains a =).");
 		}
 		if (stringStartsWith(*it, "--")) { // flag
 			// check if previous argument was a flag as well -> if yes, store previous as flag without value
@@ -99,7 +98,7 @@ void TParameters::_parseArgsWithSpace(std::vector<std::string>::iterator it,
 				// exception: if current is the last parameter -> store it
 				add(Name);
 		} else { // value
-			if (!previousParamWasFlagged) UERROR("Parameter '", *it, "' requires flagging '--'!");
+			if (!previousParamWasFlagged) throw TUserError("Parameter '", *it, "' requires flagging '--'!");
 			add(Name, *it);
 			previousParamWasFlagged = false;
 		}
@@ -115,9 +114,8 @@ void TParameters::_parseArgsWithEqualSign(std::vector<std::string>::iterator it,
 	for (; it != commandLineParams.end(); ++it) {
 		if (str::stringStartsWith(*it, "--")) {
 			// check if correct format is used
-			UERROR("Specify all arguments either as '--arg val' OR as 'arg=val', but don't mix these two options! "
-			       "(Argument '",
-			       *it, "' starts with --).");
+			throw TUserError("Specify all arguments either as '--arg val' OR as 'arg=val', but don't mix these two options! "
+			       "(Argument '", *it, "' starts with --).");
 		}
 		std::string Name = str::extractBefore(*it, '=');
 		if (str::stringContains(*it, '=')) {
@@ -138,7 +136,7 @@ void TParameters::readFile(std::string_view fileName) {
 			add(iFile.get(0), iFile.get(1));
 		} else {
 			instances::logfile().list(_logStrTask); // print this first such that user knows we're parsing the file
-			UERROR("Line ", lineNumber, " in File ", fileName, " has ", iFile.numCols(), " columns, but only 1 or 2 are allowed!");
+			throw TUserError("Line ", lineNumber, " in File ", fileName, " has ", iFile.numCols(), " columns, but only 1 or 2 are allowed!");
 		}
 		++lineNumber;
 	}
@@ -156,10 +154,10 @@ const std::string &TParameters::get(std::string_view Name) const {
 	const auto it = _find(Name);
 	if (it == _parameters.end()) {
 		if (!_inputFileName.empty())
-			UERROR("The parameter '", Name, "' is not defined on the command line nor in the input file '",
+			throw TUserError("The parameter '", Name, "' is not defined on the command line nor in the input file '",
 			       _inputFileName, "'! ");
 		else
-			UERROR("The parameter '", Name, "' is not defined! ");
+			throw TUserError("The parameter '", Name, "' is not defined! ");
 	}
 	return it->second.value;
 }

@@ -37,7 +37,7 @@ namespace impl {
 			else if (from == "false" || from == "0")
 				to = false;
 			else
-				UERROR("Can not convert string '", from, "' to a boolean!");
+				throw TUserError("Can not convert string '", from, "' to a boolean!");
 		} else {
 			to = (from == "true" || from == "1");
 		}
@@ -46,9 +46,9 @@ namespace impl {
 	void fromStringInt(std::string_view from, T& to) noexcept(!Check) {
 		if constexpr (Check) {
 			const auto a = std::from_chars(from.data(), from.data() + from.size(), to);
-			if (a.ec == std::errc::invalid_argument) { UERROR("String '", from, "' is not a number!"); }
-			if (a.ec == std::errc::result_out_of_range) { UERROR("String '", from, "' is out of range!"); }
-			if (a.ptr != from.data() + from.size()) { UERROR("String '", from, "' contains superfluous characters!"); }
+			if (a.ec == std::errc::invalid_argument) { throw TUserError("String '", from, "' is not a number!"); }
+			if (a.ec == std::errc::result_out_of_range) { throw TUserError("String '", from, "' is out of range!"); }
+			if (a.ptr != from.data() + from.size()) { throw TUserError("String '", from, "' contains superfluous characters!"); }
 		} else {
 			std::from_chars(from.data(), from.data() + from.size(), to);
 		}
@@ -58,16 +58,16 @@ namespace impl {
 		if constexpr (Check) {
 			const auto a = fast_float::from_chars(from.data(), from.data() + from.size(), to);
 			if (a.ec == std::errc::invalid_argument) {
-				UERROR("String '", from, "' is not a number!");
+				throw TUserError("String '", from, "' is not a number!");
 			}
 			if (a.ec == std::errc::result_out_of_range) {
-				UERROR("String '", from, "' is out of range!");
+				throw TUserError("String '", from, "' is out of range!");
 			}
 			if (a.ptr != from.data() + from.size()) {
-				UERROR("String '", from, "' contains superfluous characters!");
+				throw TUserError("String '", from, "' contains superfluous characters!");
 			}
 			if (!std::isfinite(to)) {
-				UERROR("String '", to, "' is not a number!");
+				throw TUserError("String '", to, "' is not a number!");
 			}
 
 		} else {
@@ -89,12 +89,13 @@ namespace impl {
 
     template<bool Check, typename T> void fromStringIterable(std::string_view from, T &to) noexcept(!Check) {
 		if constexpr (isResizable_v<T>) to.resize(0);
+		if (from.empty()){ return; }
 		if (from.front() == '(' || from.front() == '[' || from.front() == '{') {
 			if constexpr (Check) {
 				const auto f = from.front();
 				const auto b = from.back();
 				if ((f == '(' && b != ')') || (f == '[' && b != ']') || (f == '{' && b != '}'))
-					UERROR("Starting and ending parens are not the same in ", from, "!");
+					throw TUserError("Starting and ending parens are not the same in ", from, "!");
 		    }
 		    from.remove_prefix(1);
 			from.remove_suffix(1);
@@ -113,7 +114,7 @@ namespace impl {
 					to.push_back(val);
 				} else {
 					if constexpr (Check) {
-						if (i >= to.size()) UERROR("String ", from, " contains too many values!");
+						user_assert(i < to.size(), "String ", from, " contains too many values!");
 					}
 					to[i] = val;
 				}
@@ -179,11 +180,11 @@ void fromString(std::string_view from, T& to, std::string_view errorMessage) {
 	try{
 		fromString<true>(from, to);
 	}
-	catch(coretools::err::TUserError & error){
-		throw coretools::err::TUserError("", (std::string) errorMessage + error.error());
-	}
-	catch(coretools::err::TDevError & error){
-		throw error;
+	catch(coretools::err::TError & error){
+		if (error.isDevError())
+			throw coretools::TDevError(error.location(), error.what());
+		else
+			throw coretools::TUserError(error.location(), errorMessage, error.what());
 	}
 }
 

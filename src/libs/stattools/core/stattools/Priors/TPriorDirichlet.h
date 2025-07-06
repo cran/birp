@@ -69,7 +69,7 @@ public:
 		// check if size of parameter matches size of alpha
 		for (const auto &storage : this->_storageBelow) {
 			if (storage->size() != _dirichletDistribution.size()) {
-				DEVERROR("Parameter has a different size (", storage->size(),
+				throw coretools::TDevError("Parameter has a different size (", storage->size(),
 						 ") than expected based on size of alpha ( ", _dirichletDistribution.size(), ")!");
 			}
 		}
@@ -306,7 +306,7 @@ public:
 		size_t M = this->_storageBelow[0]->dimensions()[1];
 		for (const auto &storage : this->_storageBelow) {
 			if (storage->dimensions()[1] != M) {
-				DEVERROR("Parameter has a different size (", storage->size(),
+				throw coretools::TDevError("Parameter has a different size (", storage->size(),
 						 ") than expected based on size of other ( ", M, ")!");
 			}
 		}

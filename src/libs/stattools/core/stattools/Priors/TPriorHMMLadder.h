@@ -66,7 +66,7 @@ public:
 
 		// check if max = numStates-1
 		if (Type::max() != _transitionMatrix.numStates() - 1) {
-			DEVERROR("numStates-1 (", _transitionMatrix.numStates() - 1, ") differs from maximum value of Type (",
+			throw coretools::TDevError("numStates-1 (", _transitionMatrix.numStates() - 1, ") differs from maximum value of Type (",
 					 Type::max(), ").");
 		}
 	}

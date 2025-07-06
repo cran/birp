@@ -149,7 +149,7 @@ public:
 	void startCalculationsBackwards(
 		const TTransitionMatrix_baseWithRep<PrecisionType, NumStatesType, LengthType> &TransMat) {
 		if (!this->startBackwards()) {
-			DEVERROR("failed to start, did you forget to initialize the length of the container?");
+			throw coretools::TDevError("failed to start, did you forget to initialize the length of the container?");
 		}
 
 		// calculate last beta
@@ -160,7 +160,7 @@ public:
 	moveCalculationsBackward(LengthType Index, size_t Rep,
 							 const TTransitionMatrix_baseWithRep<PrecisionType, NumStatesType, LengthType> &TransMat,
 							 const THMMEmission<PrecisionType, NumStatesType> &NextEmissionProbs) {
-		if (!this->moveBackward()) { DEVERROR("moved beyond beginning of container!"); }
+		if (!this->moveBackward()) { throw coretools::TDevError("moved beyond beginning of container!"); }
 
 		// calculate forward iteration
 		_moveCalculationsBackward(*this, this->next(), Index, Rep, TransMat, NextEmissionProbs);
@@ -183,7 +183,7 @@ public:
 	void update(const TDataVector<PrecisionType, NumStatesType> &Alpha,
 				const TDataVector<PrecisionType, NumStatesType> &Beta) {
 		// ensure container sizes match
-		if (Alpha.size() != Beta.size()) { DEVERROR("Alpha and Beta are of different size!"); }
+		if (Alpha.size() != Beta.size()) { throw coretools::TDevError("Alpha and Beta are of different size!"); }
 		this->resize(Alpha.size());
 
 		// calculate gamma_t \propto alpha_t * beta_t
@@ -224,7 +224,7 @@ public:
 				const TTransitionMatrix_baseWithRep<PrecisionType, NumStatesType, LengthType> &TransMat,
 				const THMMEmission<PrecisionType, NumStatesType> &EmissionProbs) {
 		// ensure container size
-		if (PreviousAlpha.size() != Beta.size()) { DEVERROR("Alpha and Beta are of different size!"); }
+		if (PreviousAlpha.size() != Beta.size()) { throw coretools::TDevError("Alpha and Beta are of different size!"); }
 		this->resize(PreviousAlpha.size());
 
 		// calculate xi_ij(t) \propto alpha_i(t-1) * P(j|i) * beta_j(t) * Emission_j(t)
@@ -340,12 +340,12 @@ public:
 	const THMMForwardAlpha<PrecisionType, NumStatesType, LengthType> &alpha() const { return _alpha; };
 	const THMMBackwardBeta<PrecisionType, NumStatesType, LengthType> &beta() const { return _beta; };
 	const THMMPosteriorGamma<PrecisionType, NumStatesType, LengthType> &gamma() const {
-		if (!_calculateGamma) { DEVERROR("gamma is not calculated!"); }
+		if (!_calculateGamma) { throw coretools::TDevError("gamma is not calculated!"); }
 		return _gamma;
 	};
 	const THMMPosteriorXi<PrecisionType, NumStatesType, LengthType> &xi() const {
-		if (!_calculateXi) { DEVERROR("xi is not calculated!"); }
-		if (!_updatedXi) { DEVERROR("xi was not updated at first index!"); }
+		if (!_calculateXi) { throw coretools::TDevError("xi is not calculated!"); }
+		if (!_updatedXi) { throw coretools::TDevError("xi was not updated at first index!"); }
 		return _xi;
 	};
 };

@@ -94,7 +94,7 @@ public:
 		if (_rhos->hasFixedInitialValue()) { _rhos->normalize(_rhos->getFull()); }
 
 		// check if max of Type below = D (not D-1 since there is an additional neutral state)
-		if (Type::max() != _D) { DEVERROR("D (", _D, ") differs from maximum value of Type (", Type::max(), ")."); }
+		if (Type::max() != _D) { throw coretools::TDevError("D (", _D, ") differs from maximum value of Type (", Type::max(), ")."); }
 
 		// if D = 1, rho must be 1 -> don't update
 		if (_D == 1) { _rhos->setIsUpdated(false); }

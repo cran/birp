@@ -36,8 +36,8 @@ class TOutputFile {
 
 	template<typename Container, std::enable_if_t<isIterable_v<Container> && !isString_v<Container>, bool> = true>
 	void _writeHeader(const Container &Header) {
-		if (_curLin > 0 || _curCol > 0) // make sure we don't write stuff first and then the header
-			DEVERROR("Cannot write header in file '", name(), "': first lines have already been written!");
+		// make sure we don't write stuff first and then the header
+		DEV_ASSERT(_curLin == 0 && _curCol == 0);
 
 		for (const auto& h: Header) {
 			_writer.write(h);
@@ -86,7 +86,7 @@ public:
 	}
 
 	void open(std::string_view Filename, size_t NumCols, std::string_view Delim = "\t") {
-		if (isOpen()) UERROR("File '", Filename, "' is already open!");
+		DEV_ASSERT(!isOpen());
 		open(makeWriter(Filename, "w"), NumCols, Delim);
 	}
 
@@ -122,7 +122,7 @@ public:
 
 	// No point to have append function to TWriter, just open it correctly with "a" flag
 	void append(std::string_view Filename, size_t NumCols, std::string_view Delim = "\t") {
-		if (isOpen()) UERROR("File '", Filename, "' is already open!");
+		DEV_ASSERT(!isOpen());
 		_numCols = NumCols;
 		_delim   = Delim;
 		_writer.open(makeWriter(Filename, "a"));
@@ -145,8 +145,7 @@ public:
 	}
 
 	void numCols(size_t NumCols) {
-		if (_curLin > 0 || (_numCols > 0 && _curCol > 0))
-			DEVERROR("Can not set number of columns of file '", name(), "': first line has already been processed!");
+		DEV_ASSERT(_curLin == 0 && (_numCols = 0 || _curCol == 0));
 		_numCols = NumCols;
 	}
 
@@ -221,7 +220,7 @@ public:
 	TOutputFile& endln() {
 		if (isTable() && (_curCol != _numCols)) {
 			// Destructor will write buffer to file
-			DEVERROR("Can not end line in file '", name(), "': expected ", _numCols, " columns, got ", _curCol, "!");
+			throw TDevError("Can not end line in file '", name(), "': expected ", _numCols, " columns, got ", _curCol, "!");
 		}
 
 		if (_delimAtBack) { // Only pop if data has been writen

@@ -59,7 +59,7 @@ public:
 
 	const TypeCounts &operator[](const TypeValue Value) const {
 		// throw if element is outside range
-		if (Value >= _dist.size()) { DEVERROR("No entry for value ", Value, " in TCountDistribution!"); }
+		DEV_ASSERT(Value < _dist.size());
 		return _dist[underlying(Value)];
 	}
 

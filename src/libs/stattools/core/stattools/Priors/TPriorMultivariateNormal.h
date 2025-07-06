@@ -35,7 +35,7 @@ template<typename Storage> DimMVN calculateAndSetD(const std::vector<Storage *> 
 	size_t D = StorageBelow[0]->dimensions()[1];
 	for (const auto &storage : StorageBelow) {
 		if (storage->dimensions()[1] != D) {
-			DEVERROR("Number of dimensions of multivariate normal prior (=", D,
+			throw coretools::TDevError("Number of dimensions of multivariate normal prior (=", D,
 					 ") and the dimensions of storage below (=", storage->dimensions()[1], ") do not match!");
 		}
 	}

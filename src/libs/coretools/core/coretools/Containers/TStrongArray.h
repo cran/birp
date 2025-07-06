@@ -5,6 +5,7 @@
 #include <stddef.h>
 #include <type_traits>
 
+#include "coretools/Main/TError.h"
 #include "coretools/enum.h"
 
 
@@ -50,12 +51,12 @@ public:
 	constexpr explicit TStrongArray(Type v) noexcept : _data(fill_array<Type, N>(v)) {}
 	constexpr TStrongArray(std::array<Type, N> init) : _data(std::move(init)) {}
 
-	constexpr Type &operator[](Index i) noexcept {
-		assert(index(i) < N);
+	constexpr Type &operator[](Index i) noexcept(noDebug) {
+		DEBUG_ASSERT(index(i) < N);
 		return _data[index(i)];
 	}
-	constexpr const Type &operator[](Index i) const noexcept {
-		assert(index(i) < N);
+	constexpr const Type &operator[](Index i) const noexcept(noDebug) {
+		DEBUG_ASSERT(index(i) < N);
 		return _data[index(i)];
 	}
 

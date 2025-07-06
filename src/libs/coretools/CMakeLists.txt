@@ -51,7 +51,7 @@ if(RCPP)
   list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}")
   find_package(R)
   if(NOT ${R_FOUND})
-	message(FATAL_ERROR "No R found!")
+	message(FATAL_ERROR "No R found! R_EXECUTABLE: ${R_EXECUTABLE}, R_INCLUDE_DIR: ${R_INCLUDE_DIR}, R_INCLUDE_DIRS: ${R_INCLUDE_DIRS}, R_LIBRARY: ${R_LIBRARY}")
   endif()
   # Check if Rcpp and RcppArmadillo include directories are defined (via configure)
   if(RCPP_INCLUDE_DIRS AND RCPP_ARMADILLO_INCLUDE_DIRS)
@@ -88,7 +88,7 @@ elseif (NOT RCPP) # Rcpp does not need armadillo and fmt
     set(STATIC_LIB ON CACHE BOOL "" FORCE)
     message("Fetching Armadillo")
     FetchContent_Declare(armadillo
-      URL        https://sourceforge.net/projects/arma/files/armadillo-14.4.1.tar.xz
+      URL        https://gitlab.com/conradsnicta/armadillo-code/-/archive/14.4.x/armadillo-code-14.4.x.tar.gz
       SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/arma"
     )
     FetchContent_MakeAvailable(armadillo)
@@ -136,7 +136,7 @@ target_compile_definitions(${PROJECT_NAME} PUBLIC GITVERSION=\"${GIT_HEAD}\" ${U
 # Test
 if(BUILD_TESTING)
   FetchContent_Declare(googletest
-	URL        https://github.com/google/googletest/archive/refs/tags/v1.16.0.tar.gz
+	URL        https://github.com/google/googletest/releases/download/v1.17.0/googletest-1.17.0.tar.gz
 	SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/googletest"
   )
   FetchContent_MakeAvailable(googletest)

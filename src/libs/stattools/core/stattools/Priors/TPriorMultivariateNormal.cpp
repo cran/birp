@@ -55,7 +55,7 @@ arma::mat calculateMFromSigma(const arma::mat &Sigma) {
 	SigmaNoisy.diag() += 0.00000001;
 	if (!arma::inv_sympd(invSigma, SigmaNoisy)) {
 		// if it still doesn't work -> throw. Could increase noise to diagonal
-		DEVERROR("could not take inverse of Sigma!");
+		throw coretools::TDevError("could not take inverse of Sigma!");
 	}
 	arma::mat M;
 	if (!arma::chol(M, invSigma, "lower")) {
@@ -64,7 +64,7 @@ arma::mat calculateMFromSigma(const arma::mat &Sigma) {
 		coretools::cout << Sigma << std::endl;
 		coretools::cout << "invSigma: " << std::endl;
 		coretools::cout << invSigma << std::endl;
-		DEVERROR("could not do Cholesky decomposition of Sigma!");
+		throw coretools::TDevError("could not do Cholesky decomposition of Sigma!");
 	}
 	return M;
 }

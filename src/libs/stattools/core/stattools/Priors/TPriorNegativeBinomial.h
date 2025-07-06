@@ -126,7 +126,7 @@ public:
 
 	void setFixedPriorParameters(std::string_view Params) override {
 		if (!Params.empty()) {
-			UERROR("Can not set prior parameter values for ", this->name(), " distribution: they are inferred.");
+			throw coretools::TUserError("Can not set prior parameter values for ", this->name(), " distribution: they are inferred.");
 		}
 	}
 

@@ -113,7 +113,7 @@ protected:
 	coretools::TOutputFile _fileReportEM;
 
 	void _resizeDistances() {
-		if (!_distances) { DEVERROR("distances are not initialized!"); }
+		if (!_distances) { throw coretools::TDevError("distances are not initialized!"); }
 		_tau_allDist.resize(_distances->numDistanceGroups(), arma::mat(_numStates, _numStates, arma::fill::zeros));
 		_tau_allDist_old.resize(_distances->numDistanceGroups(), arma::mat(_numStates, _numStates, arma::fill::zeros));
 	}
@@ -292,7 +292,7 @@ public:
 		if (this->initializationType() == TypeTransMatInitialization::ML) {
 			size_t distGroup = _distances->operator[](Index);
 			if (distGroup == 0) {
-				DEVERROR("distGroup is 0. This should never happen, as distGroup=0 is at beginning of chunk!");
+				throw coretools::TDevError("distGroup is 0. This should never happen, as distGroup=0 is at beginning of chunk!");
 			}
 
 			// count transition z_{t-1} -> z_t

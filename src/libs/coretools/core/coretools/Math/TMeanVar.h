@@ -39,9 +39,7 @@ public:
 		// check for numeric overflow when adding value to sumOfSquares
 		// no need to check for overflow of sum, as sumOfSquares > sum
 		T square = Value * Value;
-		if (!checkForNumericOverflow_addition(_sumOfSquares, square)) {
-			DEVERROR("Numeric under- or overflow occured!");
-		}
+		DEV_ASSERT(checkForNumericOverflow_addition(_sumOfSquares, square));
 
 		_sum += Value;
 		_sumOfSquares += square;
@@ -51,9 +49,7 @@ public:
 	void add(const TMeanVar &other) {
 		// check for numeric overflow when adding value to sumOfSquares
 		// no need to check for overflow of sum, as sumOfSquares > sum
-		if (!checkForNumericOverflow_addition(_sumOfSquares, other._sumOfSquares)) {
-			DEVERROR("In function 'void TMeanVar::add(const TMeanVar & other)': Numeric under- or overflow occurred!");
-		}
+		DEV_ASSERT(checkForNumericOverflow_addition(_sumOfSquares, other._sumOfSquares));
 
 		_counter += other._counter;
 		_sum += other.sum();

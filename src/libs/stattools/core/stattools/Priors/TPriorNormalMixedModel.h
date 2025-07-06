@@ -5,6 +5,7 @@
 #ifndef TPRIORNORMALMIXEDMODEL_H
 #define TPRIORNORMALMIXEDMODEL_H
 
+#include "coretools/Main/TError.h"
 #include <cstddef>
 namespace stattools::prior {
 
@@ -22,7 +23,7 @@ template<typename T> auto checkDimensionality(T StorageBelow) {
 	for (const auto &storage : StorageBelow) {
 		// check if N is the same
 		if (storage->size() != N) {
-			DEVERROR("Total size of storage (=", storage->size(), ") and of other storage (=", N, ") do not match!");
+			throw coretools::TDevError("Total size of storage (=", storage->size(), ") and of other storage (=", N, ") do not match!");
 		}
 	}
 	return dimNames;
@@ -176,7 +177,7 @@ public:
 
 		// check if maximum of z matches K
 		if (_z->max() != NumComponents - 1) {
-			DEVERROR("NumComponents-1 (", NumComponents - 1, ") differs from maximum value for z (", _z->max(), ").");
+			throw coretools::TDevError("NumComponents-1 (", NumComponents - 1, ") differs from maximum value for z (", _z->max(), ").");
 		}
 		_z->initStorage(this, {N}, {dimNames});
 	};

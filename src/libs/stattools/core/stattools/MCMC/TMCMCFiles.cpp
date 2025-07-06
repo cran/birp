@@ -68,7 +68,7 @@ void TMCMCStatePosteriorsFile::add(TParameterBase *Param) {
 	_helper.add(Param);
 	// check if all params in this file have the same max
 	if (Param->getNumStatesForStatePosterior() != _max) {
-		DEVERROR("Can not write parameter ", Param->name(), " into state posterior file ", this->name(),
+		throw coretools::TDevError("Can not write parameter ", Param->name(), " into state posterior file ", this->name(),
 		         " since it has a different number of categories (", Param->getNumStatesForStatePosterior(),
 		         ") than the other parameters in that file (", _max, ")!");
 	}
@@ -78,7 +78,7 @@ void TMCMCStatePosteriorsFile::add(TParameterBase *Param) {
 	for (auto it : _helper.paramsInFile()) {
 		auto h = _getHeaderOneParam(it);
 		if (h != header) {
-			DEVERROR("Can not write parameter ", it->name(), " into state posterior file ", this->name(),
+			throw coretools::TDevError("Can not write parameter ", it->name(), " into state posterior file ", this->name(),
 			         " since it has a different header (", h, ") than the other parameters in that file (", header,
 			         ")!");
 		}
@@ -101,7 +101,7 @@ std::vector<std::string> TMCMCStatePosteriorsFile::_getHeaderOneParam(TParameter
 		header.insert(header.begin(), "name");
 		return header;
 	}
-	DEVERROR("Size of header (", header.size(), ") does not match the number of states (", _max, ")!");
+	throw coretools::TDevError("Size of header (", header.size(), ") does not match the number of states (", _max, ")!");
 }
 
 void TMCMCStatePosteriorsFile::writeHeader() {
@@ -263,7 +263,7 @@ void TTraceReader::_read(std::string_view) {
 //--------------------------------------------
 TMeanVarReader::TMeanVarReader(std::string_view Filename) : TMCMCFileReader(Filename) {
 	if (_file.numCols() != 3 || _file.header()[1] != "posterior_mean" || _file.header()[2] != "posterior_variance") {
-		UERROR("Invalid format of posterior mean/variance file ", Filename,
+		throw coretools::TUserError("Invalid format of posterior mean/variance file ", Filename,
 		       "! Expected 3 columns with headers 'name', 'posterior_mean' and 'posterior_variance'.");
 	}
 }
@@ -278,7 +278,7 @@ void TMeanVarReader::_read(std::string_view) {
 //--------------------------------------------
 TStatePosteriorsReader::TStatePosteriorsReader(std::string_view Filename) : TMCMCFileReader(Filename) {
 	if (_file.numCols() == 0) {
-		UERROR("Invalid format of state posterior file ", Filename,
+		throw coretools::TUserError("Invalid format of state posterior file ", Filename,
 		       "! Expected at least one column with header 'name'.");
 	}
 }
@@ -299,7 +299,7 @@ void TStatePosteriorsReader::_read(std::string_view ParamName) {
 //--------------------------------------------
 TPosteriorModeReader::TPosteriorModeReader(std::string_view Filename) : TMCMCFileReader(Filename) {
 	if (_file.numCols() != 2 || _file.header()[1] != "posterior_mode") {
-		UERROR("Invalid format of state posterior file ", Filename,
+		throw coretools::TUserError("Invalid format of state posterior file ", Filename,
 		       "! Expected two columns with headers 'name' and 'posterior_mode'.");
 	}
 }
@@ -314,7 +314,7 @@ void TPosteriorModeReader::_read(std::string_view) {
 //--------------------------------------------
 TSimulationReader::TSimulationReader(std::string_view Filename) : TMCMCFileReader(Filename) {
 	if (_file.numCols() != 2 || _file.header()[1] != "value") {
-		UERROR("Invalid format of simulation file ", Filename, "! Expected 2 columns with headers 'name' and 'value'.");
+		throw coretools::TUserError("Invalid format of simulation file ", Filename, "! Expected 2 columns with headers 'name' and 'value'.");
 	}
 }
 

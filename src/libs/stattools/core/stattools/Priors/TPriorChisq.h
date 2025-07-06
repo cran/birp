@@ -40,7 +40,7 @@ public:
 	void setFixedPriorParameters(std::string_view Params) override {
 		// chisq(k)
 		coretools::str::convertString(Params, "Parameter of " + name() + " distribution is k. ", _k);
-		if (_k == 0) { UERROR("In Chisq prior: k = 0 is invalid!"); }
+		if (_k == 0) { throw coretools::TUserError("In Chisq prior: k = 0 is invalid!"); }
 		_kDiv2Min1 = (_k / 2. - 1.);
 	};
 

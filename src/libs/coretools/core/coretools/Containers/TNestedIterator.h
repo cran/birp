@@ -1,8 +1,9 @@
 #ifndef CORETOOLS_CONTAINERS_TNESTEDITERATOR_H
 #define CORETOOLS_CONTAINERS_TNESTEDITERATOR_H
+#include <iterator>
 
 #include "coretools/Containers/TView.h"
-#include <iterator>
+#include "coretools/Main/TError.h"
 
 namespace coretools {
 
@@ -87,7 +88,7 @@ public:
 	}
 
 	constexpr TNestedIterator &operator-=(size_t i) {
-		assert(_index >= i);
+		DEBUG_ASSERT(_index >= i);
 		_index -= i;
 		return *this;
 	}
@@ -98,7 +99,7 @@ public:
 	}
 
 	friend constexpr TNestedIterator operator-(TNestedIterator Ni, size_t i) {
-		assert(Ni._index >= i);
+		DEBUG_ASSERT(Ni._index >= i);
 		Ni._index -= i;
 		return Ni;
 	}
@@ -118,13 +119,13 @@ public:
 	}
 
 	constexpr TNestedIterator &operator--() {
-		assert(_index > 0);
+		DEBUG_ASSERT(_index > 0);
 		--_index;
 		return *this;
 	}
 
 	constexpr auto operator--(int) {
-		assert(_index > 0);
+		DEBUG_ASSERT(_index > 0);
 		--_index;
 		if constexpr (I > 0) {
 			return _container->template get<I>(_index + 1);

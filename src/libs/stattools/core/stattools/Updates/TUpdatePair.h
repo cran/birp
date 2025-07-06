@@ -37,10 +37,10 @@ public:
 
 	void setWeights(const std::array<std::vector<double>, NumDim> & /*Statistics*/,
 					const std::vector<std::string> & /*Args*/, coretools::Positive /*FracUpdates*/) {
-		DEVERROR("Attempt to set weights failed: did you forget to specify update weights in parameter specification?");
+		throw coretools::TDevError("Attempt to set weights failed: did you forget to specify update weights in parameter specification?");
 	}
 	void setWeights(const std::vector<double> & /*Weights*/, coretools::Positive /*FracUpdates*/) {
-		DEVERROR("Attempt to set weights failed: did you forget to specify update weights in parameter specification?");
+		throw coretools::TDevError("Attempt to set weights failed: did you forget to specify update weights in parameter specification?");
 	}
 
 	void prepareIteration() { _sampler.sampleIndices(); }
@@ -148,7 +148,7 @@ public:
 	}
 
 	void setWeights(const std::vector<double> & /*Weights*/, coretools::Positive /*FracUpdates*/) {
-		DEVERROR("Currently not implemented");
+		throw coretools::TDevError("Currently not implemented");
 	}
 
 	void setWeights(const std::array<std::vector<double>, NumDim> &Statistics, const std::vector<std::string> &Args,

@@ -101,7 +101,7 @@ void TMCMC::_readThinningParameters() {
 
 	// thinning
 	int tmp = (int)parameters().get<double>("thinning", 10.0); // to allow for scientific 1e06
-	if (tmp < 1) { UERROR("Parameter 'thinning' must be > 0!"); }
+	if (tmp < 1) { throw coretools::TUserError("Parameter 'thinning' must be > 0!"); }
 	_thinning = tmp;
 	if (_thinning == 1) {
 		logfile().list("Will write full chain. (parameter 'thinning')");

@@ -38,13 +38,6 @@ bool readUntilDelimiter(StreamType *FilePointer, std::string &String, char Delim
 // TNamesEmpty
 //--------------------------
 
-void TNamesEmpty::_checkSizeNameVec(const std::vector<std::string> &Name, std::string_view ClassNameForError) const {
-	if (Name.size() != _complexity) {
-		DEVERROR("For class '", ClassNameForError, ": Expected vector Name to be of size ", _complexity,
-		         ", but vector '", Name, "' is of size ", Name.size(), "!");
-	}
-};
-
 TNamesEmpty::TNamesEmpty() {
 	_size                  = 0;
 	_complexity            = 0;
@@ -67,10 +60,12 @@ void TNamesEmpty::resize(size_t Size) { _size = Size; };
 
 void TNamesEmpty::addName(const std::vector<std::string> &Name) {
 	_size++;
-	_checkSizeNameVec(Name, "TNamesEmpty");
+	DEV_ASSERT(Name.size() == _complexity);
 };
 
-void TNamesEmpty::addName(const std::vector<std::string> &Name, size_t) { _checkSizeNameVec(Name, "TNamesEmpty"); };
+void TNamesEmpty::addName(const std::vector<std::string> &Name, size_t) {
+	DEV_ASSERT(Name.size() == _complexity);
+};
 
 void TNamesEmpty::addNameAndSplit(std::string_view Name) {
 	std::vector<std::string> fullName;
@@ -97,7 +92,7 @@ std::vector<std::string> TNamesEmpty::_extractFromStringAndReturnVec(std::string
 		// check: is name empty?
 		if (ThrowIfEmpty && name.empty()) {
 			std::string delimNameString = {_delimNames};
-			DEVERROR("Names that was split from string ", String, " after delimiter ", delimNameString, " is empty!");
+			throw TDevError("Names that was split from string ", String, " after delimiter ", delimNameString, " is empty!");
 		}
 		full.push_back(name);
 	}
@@ -106,13 +101,13 @@ std::vector<std::string> TNamesEmpty::_extractFromStringAndReturnVec(std::string
 	// check: is name empty?
 	if (ThrowIfEmpty && name.empty()) {
 		std::string delimLastString = {DelimiterLast};
-		DEVERROR("Name that was split from string '", String, "' after delimiter '", delimLastString, "' is empty!");
+		throw TDevError("Name that was split from string '", String, "' after delimiter '", delimLastString, "' is empty!");
 	}
 	full.push_back(name);
 
 	// check: does full have expected size?
 	if (full.size() != _complexity) {
-		DEVERROR("Vector of names ", full, " of size ", full.size(), " does not have ",
+		throw TDevError("Vector of names ", full, " of size ", full.size(), " does not have ",
 		         _complexity, " elements as expected based on complexity of name class!");
 	}
 
@@ -148,7 +143,7 @@ bool TNamesEmpty::_extractFromStreamAndFillVec(std::vector<std::string> &Vec, st
 		// check if name is valid
 		if (ThrowIfEmpty && name.empty()) {
 			std::string delimNameString = {_delimNames};
-			DEVERROR("Names that read from stream before delimiter ", delimNameString, " is empty!");
+			throw TDevError("Names that read from stream before delimiter ", delimNameString, " is empty!");
 		}
 		Vec.push_back(name);
 	}
@@ -158,13 +153,13 @@ bool TNamesEmpty::_extractFromStreamAndFillVec(std::vector<std::string> &Vec, st
 	}
 	if (ThrowIfEmpty && name.empty()) {
 		std::string delimLastString = {DelimiterLast};
-		DEVERROR("Names that read from stream before delimiter '", delimLastString, "' is empty!");
+		throw TDevError("Names that read from stream before delimiter '", delimLastString, "' is empty!");
 	}
 	Vec.push_back(name);
 
 	// check: does Vec have expected size?
 	if (Vec.size() != _complexity) {
-		DEVERROR("Vector of names (", concatenateString(Vec, ", "), ") of size ", Vec.size(), " does not have ",
+		throw TDevError("Vector of names (", concatenateString(Vec, ", "), ") of size ", Vec.size(), " does not have ",
 		         _complexity, " elements as expected based on complexity of name class!");
 	}
 
@@ -194,11 +189,10 @@ bool TNamesEmpty::extractNameFromStreamAndFillIntoVec(std::istream *FilePointer,
 
 bool TNamesEmpty::checkIfNameShouldBeKept(const std::vector<std::string> &Name, std::string_view FileName) {
 	// check if we reached end of name class
-	if (_indexVisited >= size()) {
-		UERROR("Reached end of known rownames in file ", FileName, "! Name ", concatenateString(Name, _delimNames),
-		       " (corresponding to the ", _indexVisited,
-		       " element stored) was found in file, but size of known names is only ", size(), ".");
-	}
+	user_assert(_indexVisited < size(), "Reached end of known rownames in file ", FileName, "! Name ",
+				concatenateString(Name, _delimNames), " (corresponding to the ", _indexVisited,
+				" element stored) was found in file, but size of known names is only ", size(), ".");
+
 	// is the name the same as we would expect from name class?
 	if (getName(_indexVisited) == Name) {
 		// same name -> keep! (no need to store it, as it is already there)
@@ -206,15 +200,11 @@ bool TNamesEmpty::checkIfNameShouldBeKept(const std::vector<std::string> &Name, 
 		return true;
 	} else {
 		// check if name exists
-		if (exists(Name)) {
-			// it does exist, but not at the right place -> throw! We can't reorder most outer rownames
-			UERROR("Rownames of file ", FileName, " are shuffled relative to the expected names! Name ",
-			       concatenateString(Name, _delimNames), " was expected to be equal to ", operator[](_indexVisited),
-			       ",  but it was found at another position in file.");
-		} else {
-			// it doesn't exist -> skip
-			return false;
-		}
+		user_assert(!exists(Name), "Rownames of file ", FileName, " are shuffled relative to the expected names! Name ",
+					concatenateString(Name, _delimNames), " was expected to be equal to ", operator[](_indexVisited),
+					",  but it was found at another position in file.");
+		// it doesn't exist -> skip
+		return false;
 	}
 };
 
@@ -227,7 +217,7 @@ std::vector<std::string> TNamesEmpty::extractTitleFromString(std::string &String
 
 void TNamesEmpty::setTitle(const std::vector<std::string> &Title) {
 	if (Title.size() != _complexity) {
-		DEVERROR("Title (", concatenateString(Title, ","), ") of size ", Title.size(),
+		throw TDevError("Title (", concatenateString(Title, ","), ") of size ", Title.size(),
 		         " does not have expected size based on complexity (", _complexity, ")!");
 	}
 	_title = Title;
@@ -269,9 +259,10 @@ bool TNamesEmpty::operator!=(const TNamesEmpty &Other) const { return !operator=
 
 size_t TNamesEmpty::getIndex(std::string_view Name) {
 	// base class throws -> can not be filled, so don't ask for index
-	DEVERROR("Name ", Name,
+	throw TDevError("Name ", Name,
 	         " does not exist in Name class TNamesEmpty! Always check first with exists() whether or not name class "
 	         "exists.");
+	return -1;
 };
 
 const std::vector<std::string> &TNamesEmpty::getTitleVec() const { return _title; };
@@ -319,23 +310,21 @@ void TNamesStrings::resize(size_t Size) {
 };
 
 void TNamesStrings::addName(const std::vector<std::string> &Name) {
-	_checkSizeNameVec(Name, "TNamesStrings");
+	DEV_ASSERT(Name.size() == _complexity);
 	_names.push_back(Name[0]);
 	_size++;
 };
 
 void TNamesStrings::addName(const std::vector<std::string> &Name, size_t Index) {
-	_checkSizeNameVec(Name, "TNamesStrings");
-	if (Index >= _names.size()) {
-		DEVERROR("Index ", Index, " is larger than size of Name vector (", _names.size(), ")!");
-	}
+	DEV_ASSERT(Name.size() == _complexity);
+	DEV_ASSERT(Index < _names.size());
+
 	_names[Index] = Name[0];
 };
 
 std::string TNamesStrings::operator[](size_t Index) const {
-	if (Index >= _names.size()) {
-		DEVERROR("Index ", Index, " is larger than size of Name vector (", _names.size(), ")!");
-	}
+	DEV_ASSERT(Index < _names.size());
+
 	return _names[Index];
 };
 
@@ -347,7 +336,7 @@ bool TNamesStrings::exists(std::string_view Name) {
 };
 
 bool TNamesStrings::exists(const std::vector<std::string> &Name) {
-	_checkSizeNameVec(Name, "TNamesStrings");
+	DEV_ASSERT(Name.size() == _complexity);
 	return exists(Name[0]);
 };
 
@@ -370,9 +359,10 @@ size_t TNamesStrings::getIndex(std::string_view Name) {
 	// exists)
 	auto match = std::find(_names.begin(), _names.end(), Name);
 	if (match != _names.end()) { return std::distance(_names.begin(), match); }
-	DEVERROR("Name ", Name,
+	throw TDevError("Name ", Name,
 	         " does not exist in Name class TNamesStrings! Always check first with exist() whether or not name class "
 	         "exists.");
+	return -1;
 };
 
 size_t TNamesStrings::size() const { return _names.size(); };
@@ -407,7 +397,7 @@ bool TNamesIndices::exists(std::string_view Name) {
 };
 
 bool TNamesIndices::exists(const std::vector<std::string> &Name) {
-	_checkSizeNameVec(Name, "TNamesIndices");
+	DEV_ASSERT(Name.size() == _complexity);
 	return exists(Name[0]);
 };
 
@@ -423,8 +413,9 @@ size_t TNamesIndices::getIndex(std::string_view Name) {
 	// exists)
 	size_t index = fromString<size_t>(Name) - _offset;
 	if (index < _size) { return index; }
-	DEVERROR("Name ", Name, " does not exist in Name class TNamesIndices (with size = ", _size,
+	throw TDevError("Name ", Name, " does not exist in Name class TNamesIndices (with size = ", _size,
 	         ")! Always check first with exist() whether or not name class exists.");
+	return -1;
 };
 
 //-------------------------------
@@ -454,7 +445,7 @@ bool TNamesIndicesAlphabetUpperCase::exists(std::string_view Name) {
 };
 
 bool TNamesIndicesAlphabetUpperCase::exists(const std::vector<std::string> &Name) {
-	_checkSizeNameVec(Name, "TNamesIndicesAlphabetUpperCase");
+	DEV_ASSERT(Name.size() == _complexity);
 	return exists(Name[0]);
 };
 
@@ -464,8 +455,9 @@ size_t TNamesIndicesAlphabetUpperCase::getIndex(std::string_view Name) {
 	// exists)
 	size_t index = upperCaseAlphabetIndexToNumeric(Name);
 	if (index < _size) { return index; }
-	DEVERROR("Name ", Name, " does not exist in Name class TNamesIndicesAlphabetUpperCase (with size = ", _size,
+	throw TDevError("Name ", Name, " does not exist in Name class TNamesIndicesAlphabetUpperCase (with size = ", _size,
 	         ")! Always check first with exist() whether or not name class exists.");
+	return -1;
 };
 
 //-------------------------------
@@ -495,7 +487,7 @@ bool TNamesIndicesAlphabetLowerCase::exists(std::string_view Name) {
 };
 
 bool TNamesIndicesAlphabetLowerCase::exists(const std::vector<std::string> &Name) {
-	_checkSizeNameVec(Name, "TNamesIndicesAlphabetLowerCase");
+	DEV_ASSERT(Name.size() == _complexity);
 	return exists(Name[0]);
 };
 
@@ -505,8 +497,9 @@ size_t TNamesIndicesAlphabetLowerCase::getIndex(std::string_view Name) {
 	// exists)
 	size_t index = lowerCaseAlphabetIndexToNumeric(Name);
 	if (index < _size) { return index; }
-	DEVERROR("Name ", Name, " does not exist in Name class TNamesIndicesAlphabetLowerCase (with size = ", _size,
-	         ")! Always check first with exist() whether or not name class exists.");
+	throw TDevError("Name ", Name, " does not exist in Name class TNamesIndicesAlphabetLowerCase (with size = ", _size,
+			 ")! Always check first with exist() whether or not name class exists.");
+	return -1;
 };
 
 //-------------------------------
@@ -536,7 +529,7 @@ void TNamesPositions::setOrderChrPos(bool OrderIsChrPos) { _orderIsChunkPos = Or
 void TNamesPositions::addPositions(TPositionsRaw *Positions) { _positions = Positions; };
 
 void TNamesPositions::addName(const std::vector<std::string> &Name) {
-	_checkSizeNameVec(Name, "TNamesPositions");
+	DEV_ASSERT(Name.size() == _complexity);
 	// account for order Chr-Pos or Pos-Chr
 	std::string pos;
 	std::string chr;
