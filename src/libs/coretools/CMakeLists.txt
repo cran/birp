@@ -51,7 +51,7 @@ if(RCPP)
   list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}")
   find_package(R)
   if(NOT ${R_FOUND})
-	message(FATAL_ERROR "No R found! R_EXECUTABLE: ${R_EXECUTABLE}, R_INCLUDE_DIR: ${R_INCLUDE_DIR}, R_INCLUDE_DIRS: ${R_INCLUDE_DIRS}, R_LIBRARY: ${R_LIBRARY}")
+	message(FATAL_ERROR "No R found! R_EXECUTABLE: ${R_EXECUTABLE}, R_INCLUDE_DIR: ${R_INCLUDE_DIR}, R_INCLUDE_DIRS: ${R_INCLUDE_DIRS}")
   endif()
   # Check if Rcpp and RcppArmadillo include directories are defined (via configure)
   if(RCPP_INCLUDE_DIRS AND RCPP_ARMADILLO_INCLUDE_DIRS)
@@ -126,7 +126,7 @@ target_include_directories(${PROJECT_NAME}
   PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/core" ${R_INCLUDE_DIRS} ${RCPP_INCLUDE_DIRS} ${RCPP_ARMADILLO_INCLUDE_DIRS}
   SYSTEM INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/core"
         ${R_INCLUDE_DIRS} ${RCPP_INCLUDE_DIRS} ${RCPP_ARMADILLO_INCLUDE_DIRS})
-target_link_libraries(${PROJECT_NAME} PUBLIC ${SAN_LINK} armadillo fast_float ${ZLIB_LIBRARIES} ${R_LIBRARY})
+target_link_libraries(${PROJECT_NAME} PUBLIC ${SAN_LINK} armadillo fast_float ${ZLIB_LIBRARIES})
 target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_17)
 set_target_properties(${PROJECT_NAME} PROPERTIES CXX_EXTENSIONS OFF)
 target_compile_options(${PROJECT_NAME} PUBLIC ${SAN} PRIVATE -Wall -Wextra)

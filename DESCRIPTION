@@ -2,8 +2,8 @@ Package: birp
 Type: Package
 Title: Testing for Population Trends Using Low-Cost Ecological Count
         Data
-Version: 0.0.4
-Date: 2025-07-06
+Version: 0.0.5
+Date: 2025-07-12
 Authors@R: c(person("Madleina", "Caduff", 
                      role = c("aut", "cre"),
                      email = "madleina.caduff@unifr.ch"),
@@ -27,7 +27,7 @@ RoxygenNote: 7.3.1
 Suggests: knitr, rmarkdown
 VignetteBuilder: knitr
 NeedsCompilation: yes
-Packaged: 2025-07-06 10:50:29 UTC; madleina
+Packaged: 2025-07-12 09:44:33 UTC; madleina
 Author: Madleina Caduff [aut, cre],
   Daniel Wegmann [aut],
   Liam Singer [aut],
@@ -35,4 +35,4 @@ Author: Madleina Caduff [aut, cre],
   Andreas Füglistaler [ctb]
 Maintainer: Madleina Caduff <madleina.caduff@unifr.ch>
 Repository: CRAN
-Date/Publication: 2025-07-06 23:20:05 UTC
+Date/Publication: 2025-07-12 21:00:07 UTC

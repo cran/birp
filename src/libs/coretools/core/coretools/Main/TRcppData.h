@@ -40,7 +40,7 @@ public:
 
 	size_t index(std::string_view Name) {
 		auto it = std::find(_inputNames.begin(), _inputNames.end(), Name);
-		if (it == _inputNames.end()) { DEVERROR("Failed to find data frame with name ", Name, "!"); }
+		if (it == _inputNames.end()) { throw TDevError("Failed to find data frame with name ", Name, "!"); }
 		return std::distance(_inputNames.begin(), it);
 	}
 

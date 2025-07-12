@@ -80,7 +80,7 @@ class TOutputRcpp {
 			_cols.emplace_back(_curCol, _vecString.size(), impl::RType::String);
 			_vecString.emplace_back();
 		} else {
-			DEVERROR("Incompatible R type for vbalue ", val, "!");
+			throw TDevError("Incompatible R type for value ", val, "!");
 		}
 	}
 
@@ -112,7 +112,7 @@ class TOutputRcpp {
 			_vecString[_cols[_curCol].positionInVec].push_back(coretools::str::toString(val));
 			break;
 		}
-		default: DEVERROR("Invalid R type!"); // should never happen
+		default: throw TDevError("Invalid R type!"); // should never happen
 		}
 	}
 
@@ -156,7 +156,7 @@ class TOutputRcpp {
 				break;
 			}
 			default: {
-				DEVERROR("Invalid enum type"); // should never happen
+				throw TDevError("Invalid enum type"); // should never happen
 			}
 			}
 		}
@@ -193,7 +193,7 @@ public:
 	~TOutputRcpp() { close(); }
 
 	void open(std::string_view Filename, size_t NumCols, std::string_view /*Delim*/ = "\t") {
-		if (isOpen()) UERROR("File '", Filename, "' is already open!");
+		DEV_ASSERT(!isOpen());
 
 		_filename = Filename;
 		_numCols  = NumCols;
@@ -226,8 +226,7 @@ public:
 	}
 
 	void numCols(size_t NumCols) {
-		if (_curLin > 0 || (_numCols > 0 && _curCol > 0))
-			DEVERROR("Can not set number of columns of file '", name(), "': first line has already been processed!");
+		DEV_ASSERT(_curLin == 0 && (_numCols == 0 || _curCol == 0));
 		_numCols = NumCols;
 	}
 
@@ -279,7 +278,7 @@ public:
 	TOutputRcpp &endln() {
 		if (_curLin == 0 && _numCols == 0) { _numCols = _curCol; } // remember now and forever how many cols there are
 		if (_curCol != _numCols) {
-			DEVERROR("Can not end line in file '", name(), "': expected ", _numCols, " columns, got ", _curCol, "!");
+			throw TDevError("Can not end line in file '", name(), "': expected ", _numCols, " columns, got ", _curCol, "!");
 		}
 
 		// Go to next line

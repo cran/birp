@@ -146,13 +146,14 @@ public:
 	size_t index(std::string_view Key) const {
 		auto it = _mapIt(Key);
 		if (it == _map.end() || it->first != Key)
-			UERROR("Cannot read column with name '", Key, "' in file ", name(), ", on line ", _curLin, "!");
+			throw TUserError("Cannot read column with name '", Key, "' in file ", name(), ", on line ", _curLin, "!");
 		return it->second;
 	}
 
 	// Getters
 	template<typename T> T get(size_t I) const { // I is relative position as defined in 'Columns'
-		if (I >= numCols()) UERROR("Cannot read column ", I, "' in file ", name(), ", on line ", _curLin, "!");
+		if (I >= numCols())
+			throw TUserError("Cannot read column ", I, "' in file ", name(), ", on line ", _curLin, "!");
 
 		// get value as R data type
 		const Rcpp::DataFrame &df = instances::rcppData()[_ix];
@@ -175,7 +176,7 @@ public:
 		}
 		default: {
 			// Note: also CPLXSXP (Rcpp::ComplexVector) is invalid here
-			DEVERROR("Invalid SEXPTYPE ", TYPEOF(df[I]));
+			throw TDevError("Invalid SEXPTYPE ", TYPEOF(df[I]));
 		}
 		}
 	}

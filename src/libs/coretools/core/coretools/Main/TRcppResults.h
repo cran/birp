@@ -26,7 +26,7 @@ public:
 
 	void add(std::string_view Filename, const Rcpp::DataFrame &Df) {
 		auto it = std::find(_outputNames.begin(), _outputNames.end(), (std::string)Filename);
-		if (it != _outputNames.end()) { DEVERROR("Object with name ", Filename, " already exists!"); }
+		if (it != _outputNames.end()) { throw TDevError("Object with name ", Filename, " already exists!"); }
 
 		// now add
 		_outputNames.push_back((std::string)Filename);

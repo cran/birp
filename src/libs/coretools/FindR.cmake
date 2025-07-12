@@ -94,6 +94,12 @@ if(R_EXECUTABLE)
         message(STATUS "Subdirectory of R_ROOT_DIR: ${subdir}")
     endforeach()
 
+    # Debugging only: Print all files inside lib
+    file(GLOB lib_files "${R_ROOT_DIR}/lib/*")
+    foreach(lib_file ${lib_files})
+        message(STATUS "File in lib directory: ${lib_file}")
+    endforeach()
+
     find_path(R_INCLUDE_DIR R.h
             HINTS ${R_ROOT_DIR}
             PATHS /usr/local/lib /usr/local/lib64 /usr/share /usr/include /usr/local/include
@@ -163,5 +169,5 @@ message(STATUS "Using R_LIBRARY: ${R_LIBRARY}")
 
 # Handle the QUIETLY and REQUIRED arguments and set R_FOUND to TRUE if all listed variables are TRUE
 include(FindPackageHandleStandardArgs)
-find_package_handle_standard_args(R HANDLE_COMPONENTS REQUIRED_VARS R_EXECUTABLE R_INCLUDE_DIR R_LIBRARY)
-mark_as_advanced(R_FOUND R_EXECUTABLE R_INCLUDE_DIR R_LIBRARY)
+find_package_handle_standard_args(R HANDLE_COMPONENTS REQUIRED_VARS R_EXECUTABLE R_INCLUDE_DIR)
+mark_as_advanced(R_FOUND R_EXECUTABLE R_INCLUDE_DIR)
