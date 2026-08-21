@@ -4,10 +4,10 @@
 \alias{.addLegendMultiGamma.birp}
 \title{Function to add legend to plot denoting gammas}
 \usage{
-.addLegendMultiGamma.birp(x, legend, dens, xlim, col, lwd, lty, ...)
+.addLegendMultiGamma.birp(num, legend, dens, xlim, col, lwd, lty, ...)
 }
 \arguments{
-\item{x}{A birp object}
+\item{num}{The number of gamma/Deltas}
 
 \item{legend}{Add a legend to the plot}
 
