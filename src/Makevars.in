@@ -28,40 +28,72 @@ $(REPONAME)/arma.libs: $(REPONAME)/build/cmake.log
 $(REPONAME)/build/cmake.log: $(REPONAME)
 
 $(REPONAME):
-	CMAKE=$${CMAKE:-$$(which cmake)} && \
-	CMAKE=$${CMAKE:-/Applications/CMake.app/Contents/bin/cmake} && \
-	[ -x "$$CMAKE" ] || $$(echo "\n\n\n !!! no cmake command found") && \
-	RSCRIPT=$${R_HOME}/bin$${R_ARCH_BIN}/Rscript.exe && \
-	[ -x "$$RSCRIPT" ] || RSCRIPT=$${R_HOME}/bin/Rscript && \
-	[ -x "$$RSCRIPT" ] || $$(echo "\n\n\n !!! no Rscript command found") && \
-	RCPP_INCLUDE=$$($${RSCRIPT} --vanilla --slave -e "stopifnot(require('Rcpp', quietly=TRUE));cat(Rcpp:::Rcpp.system.file('include'))") && \
-	[ -x "$$RCPP_INCLUDE" ] || $$(echo "\n\n\n !!! no RCPP_INCLUDE library found") && \
-	wget -v https://bitbucket.org/wegmannlab/$(REPONAME)/get/$(GIT_COMMIT).tar.gz 2> /dev/null || \
-	curl -Okv https://bitbucket.org/wegmannlab/$(REPONAME)/get/$(GIT_COMMIT).tar.gz && \
-	tar -xvzf $(GIT_COMMIT).tar.gz && \
-	rm -r $(GIT_COMMIT).tar.gz && \
-	mv -v wegmannlab-birp_cpp* $(REPONAME) && \
-	mkdir $(REPONAME)/build && cd $(REPONAME)/build && \
-	$${CMAKE} -S .. \
-	-G "Unix Makefiles" \
-	-DCMAKE_BUILD_TYPE=Release \
-	-DBUILD_SHARED_LIBS:bool=OFF \
-	-DCMAKE_POSITION_INDEPENDENT_CODE:bool=ON \
-	-DRCPP=ON \
-	-DRCPP_INCLUDE_DIRS="$${RCPP_INCLUDE}" \
-	-DR_HOME="$(R_HOME)" > cmake.log  && \
-	sed '/^#pragma/d' ../coretools/fast_float/include/fast_float/parse_number.h > tmp.h && \
-	mv tmp.h ../coretools/fast_float/include/fast_float/parse_number.h && \
-	echo "ARMA_LIBS = $$(grep ARMA_LIBS cmake.log | cut -d "=" -f2 | cut -d ' ' -f2- | sed 's/;/ /g')" > ../arma.libs && \
-	make birpLib && \
-	mv -v libbirpLib.* .. && \
-	mv -v _deps/coretools-build/libcoretools.* .. && \
-	mv -v _deps/stattools-build/libstattools.* .. && \
-	mv -v _deps/armadillo-build/libarmadillo.* .. && \
-	cd .. && rm -rf build \
-	rm -rf coretools/tests stattools/tests coretools/.* stattools/.* && \
-	rm -rf coretools/fast_float/tests coretools/fast_float/.* && \
-	rm -rf coretools/fast_float/benchmarks coretools/fast_float/fuzz && \
-	rm -rf coretools/arma/tests? coretools/arma/examples && \
-	rm -rf coretools/arma/misc coretools/*.pdf && \
-	rm -rf coretools/fmt/test coretools/fmt/.*
+	{ \
+	    [ -x "$${CMAKE}" ]  || CMAKE=$$(which cmake); \
+	    [ -x "$${CMAKE}" ]  || CMAKE=/usr/bin/cmake; \
+	    [ -x "$${CMAKE}" ]  || CMAKE=/usr/local/bin/cmake; \
+	    [ -x "$${CMAKE}" ]  || CMAKE=/opt/homebrew/bin/cmake; \
+	    [ -x "$${CMAKE}" ]  || CMAKE=/Applications/CMake.app/Contents/bin/cmake; \
+	    echo "$${CMAKE}" && [ -x "$${CMAKE}" ] ; \
+	} && { \
+	    RSCRIPT=$${R_HOME}/bin$${R_ARCH_BIN}/Rscript.exe; \
+	    [ -x "$${RSCRIPT}" ] || RSCRIPT=$${R_HOME}/bin/Rscript; \
+	    echo "$${RSCRIPT}" && [ -x "$${RSCRIPT}" ] ; \
+	} && { \
+	    RCPP_INCLUDE=$$($${RSCRIPT} --vanilla --slave -e "stopifnot(require('Rcpp', quietly=TRUE));cat(Rcpp:::Rcpp.system.file('include'))") && \
+	    echo "$${RCPP_INCLUDE}" && [ -d "$${RCPP_INCLUDE}" ] ; \
+	} && { \
+	    R_CC=$$($${RSCRIPT} --vanilla --slave -e "cat(system2(file.path(R.home('bin'),'R'),c('CMD','config','CC'),stdout=TRUE))")  && \
+	    echo "$${R_CC}" && \
+	    R_CXX=$$($${RSCRIPT} --vanilla --slave -e "cat(system2(file.path(R.home('bin'), 'R'), c('CMD','config','CXX'), stdout=TRUE))") && \
+	    echo "$${R_CXX}" && \
+	    R_CXXFLAGS=$$($${RSCRIPT} --vanilla --slave -e "cat(system2(file.path(R.home('bin'), 'R'), c('CMD','config','CXXFLAGS'), stdout=TRUE))") && \
+	    echo "$${R_CXXFLAGS}"; \
+	} && { \
+	    wget -v https://bitbucket.org/wegmannlab/$(REPONAME)/get/$(GIT_COMMIT).tar.gz 2> /dev/null || \
+	    curl -Okv https://bitbucket.org/wegmannlab/$(REPONAME)/get/$(GIT_COMMIT).tar.gz; \
+	} && { \
+	    tar -xvzf $(GIT_COMMIT).tar.gz && \
+	    rm -r $(GIT_COMMIT).tar.gz && \
+	    mv -v wegmannlab-birp_cpp* $(REPONAME); \
+	} && { \
+	    mkdir $(REPONAME)/build && cd $(REPONAME)/build && \
+		CC=$${R_CC} CXX=$${R_CXX} CXXFLAGS=$${R_CXXFLAGS} \
+	    $${CMAKE} -S .. \
+	        -G "Unix Makefiles" \
+	        -DCMAKE_BUILD_TYPE=Release \
+	        -DBUILD_SHARED_LIBS:bool=OFF \
+	        -DCMAKE_POSITION_INDEPENDENT_CODE:bool=ON \
+	        -DCMAKE_FIND_PACKAGE_NO_PACKAGE_REGISTRY=ON \
+	        -DCMAKE_FIND_PACKAGE_NO_SYSTEM_PACKAGE_REGISTRY=ON \
+	        -DCMAKE_EXPORT_NO_PACKAGE_REGISTRY=ON \
+	        -DRCPP=ON \
+	        -DBUILD_SMOKE_TEST=false \
+	        -DRCPP_INCLUDE_DIRS="$${RCPP_INCLUDE}" \
+	        -DR_HOME="$(R_HOME)" > cmake.log; \
+	} && { \
+	    sed '/^#pragma/d' ../coretools/fast_float/include/fast_float/parse_number.h > tmp.h && \
+	    mv tmp.h ../coretools/fast_float/include/fast_float/parse_number.h && \
+	    echo "ARMA_LIBS = $$(grep ARMA_LIBS cmake.log | cut -d "=" -f2 | cut -d ' ' -f2- | sed 's/;/ /g')" > ../arma.libs; \
+	} && { \
+	    make birpLib; \
+	} && { \
+	    mv -v libbirpLib.* .. && \
+	    mv -v _deps/coretools-build/libcoretools.* .. && \
+	    mv -v _deps/stattools-build/libstattools.* .. && \
+	    mv -v _deps/armadillo-build/libarmadillo.* ..; \
+	} && { \
+	    cd .. && rm -rf build && \
+	    find coretools -mindepth 1 -maxdepth 1 \
+	        ! -name core ! -name arma ! -name fast_float ! -name fmt -exec rm -rv {} +; \
+	    find stattools -mindepth 1 -maxdepth 1 ! -name core -exec rm -rv {} +; \
+	    find coretools/arma -mindepth 1 -maxdepth 1 ! -name include ! -exec rm -rv {} +; \
+	    find coretools/fast_float -mindepth 1 -maxdepth 1 ! -name include -exec rm -rv {} +; \
+	    find coretools/fmt -mindepth 1 -maxdepth 1 ! -name include ! -exec rm -rv {} +; \
+		ls -al . > ~/Desktop/birp.out ; \
+		ls -al coretools >> ~/Desktop/birp.out ; \
+		ls -al stattools >> ~/Desktop/birp.out ; \
+		ls -al coretools/arma >> ~/Desktop/birp.out ; \
+		ls -al coretools/fast_float >> ~/Desktop/birp.out ; \
+		ls -al coretools/fmt >> ~/Desktop/birp.out ; \
+	}
