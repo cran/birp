@@ -1,6 +1,5 @@
 REPONAME = birp_cpp
 # get commit number
--include git_commit
 
 PKG_CPPFLAGS = -I$(REPONAME)/coretools/core/ \
 -I$(REPONAME)/coretools/fast_float/include/ \
@@ -25,9 +24,9 @@ $(SHLIB): $(REPONAME) $(REPONAME)/arma.libs
 
 $(REPONAME)/arma.libs: $(REPONAME)/build/cmake.log
 
-$(REPONAME)/build/cmake.log: $(REPONAME)
+$(REPONAME)/build/cmake.log: $(REPONAME)/build
 
-$(REPONAME):
+$(REPONAME)/build:
 	{ \
 	    [ -x "$${CMAKE}" ]  || CMAKE=$$(which cmake); \
 	    [ -x "$${CMAKE}" ]  || CMAKE=/usr/bin/cmake; \
@@ -49,13 +48,6 @@ $(REPONAME):
 	    echo "$${R_CXX}" && \
 	    R_CXXFLAGS=$$($${RSCRIPT} --vanilla --slave -e "cat(system2(file.path(R.home('bin'), 'R'), c('CMD','config','CXXFLAGS'), stdout=TRUE))") && \
 	    echo "$${R_CXXFLAGS}"; \
-	} && { \
-	    wget -v https://bitbucket.org/wegmannlab/$(REPONAME)/get/$(GIT_COMMIT).tar.gz 2> /dev/null || \
-	    curl -Okv https://bitbucket.org/wegmannlab/$(REPONAME)/get/$(GIT_COMMIT).tar.gz; \
-	} && { \
-	    tar -xvzf $(GIT_COMMIT).tar.gz && \
-	    rm -r $(GIT_COMMIT).tar.gz && \
-	    mv -v wegmannlab-birp_cpp* $(REPONAME); \
 	} && { \
 	    mkdir $(REPONAME)/build && cd $(REPONAME)/build && \
 		CC=$${R_CC} CXX=$${R_CXX} CXXFLAGS=$${R_CXXFLAGS} \
@@ -85,15 +77,8 @@ $(REPONAME):
 	} && { \
 	    cd .. && rm -rf build && \
 	    find coretools -mindepth 1 -maxdepth 1 \
-	        ! -name core ! -name arma ! -name fast_float ! -name fmt -exec rm -rv {} +; \
+	        ! -name core ! -name arma ! -name fast_float -exec rm -rv {} +; \
 	    find stattools -mindepth 1 -maxdepth 1 ! -name core -exec rm -rv {} +; \
 	    find coretools/arma -mindepth 1 -maxdepth 1 ! -name include ! -exec rm -rv {} +; \
 	    find coretools/fast_float -mindepth 1 -maxdepth 1 ! -name include -exec rm -rv {} +; \
-	    find coretools/fmt -mindepth 1 -maxdepth 1 ! -name include ! -exec rm -rv {} +; \
-		ls -al . > ~/Desktop/birp.out ; \
-		ls -al coretools >> ~/Desktop/birp.out ; \
-		ls -al stattools >> ~/Desktop/birp.out ; \
-		ls -al coretools/arma >> ~/Desktop/birp.out ; \
-		ls -al coretools/fast_float >> ~/Desktop/birp.out ; \
-		ls -al coretools/fmt >> ~/Desktop/birp.out ; \
 	}

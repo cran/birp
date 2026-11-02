@@ -1,3 +1,9 @@
 #!/bin/sh
 
-rm -rf src/birp_cpp src/Makevars
+rm -rf src/Makevars
+rm -rf src/birp_cpp/coretools
+rm -rf src/birp_cpp/stattools
+rm src/birp_cpp/libbirpLib.*
+rm src/birp_cpp/libcoretools.*
+rm src/birp_cpp/libstattools.*
+rm src/birp_cpp/libarmadillo.*

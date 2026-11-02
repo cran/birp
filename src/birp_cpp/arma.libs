@@ -1,0 +1,1 @@
+ARMA_LIBS = /usr/lib64/libflexiblas.so /usr/lib64/libarpack.so /usr/lib64/libsuperlu.so

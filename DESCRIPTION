@@ -2,8 +2,8 @@ Package: birp
 Type: Package
 Title: Testing for Population Trends Using Low-Cost Ecological Count
         Data
-Version: 0.9.0
-Date: 2026-09-01
+Version: 0.9.1
+Date: 2026-11-02
 Authors@R: c(person("Madleina", "Caduff", role = c("aut"),
                      email = "madleina.caduff@unifr.ch"),
              person("Andreas", "Füglistaler", role = c("aut", "cre"),
@@ -20,8 +20,6 @@ Authors@R: c(person("Madleina", "Caduff", role = c("aut"),
                      comment = "Author of fast_float"),
 			 person("João Paulo", "Magalhaes", role = c("cph"),
                      comment = "Author of fast_float"),
-			 person("Victor", "Zverovich", role = c("cph"),
-                     comment = "Author of {fmt}"),
 			 person("Rene", "Brun", role = c("cph"),
                      comment = "Author of FindR.cmake (CERN ROOT)"),
 			 person("Fons", "Rademakers", role = c("cph"),
@@ -37,7 +35,7 @@ Suggests: knitr, rmarkdown
 VignetteBuilder: knitr
 Config/roxygen2/version: 8.0.0
 NeedsCompilation: yes
-Packaged: 2026-09-01 14:24:50 UTC; andreas
+Packaged: 2026-11-02 13:57:19 UTC; andreas
 Author: Madleina Caduff [aut],
   Andreas Füglistaler [aut, cre],
   Daniel Wegmann [aut],
@@ -47,9 +45,8 @@ Author: Madleina Caduff [aut],
   Ryan Curtin [cph] (Author of Armadillo),
   Daniel Lemire [cph] (Author of fast_float),
   João Paulo Magalhaes [cph] (Author of fast_float),
-  Victor Zverovich [cph] (Author of {fmt}),
   Rene Brun [cph] (Author of FindR.cmake (CERN ROOT)),
   Fons Rademakers [cph] (Author of FindR.cmake (CERN ROOT))
 Maintainer: Andreas Füglistaler <andreas.fueglistaler@unifr.ch>
 Repository: CRAN
-Date/Publication: 2026-09-25 22:30:02 UTC
+Date/Publication: 2026-11-02 20:10:16 UTC
