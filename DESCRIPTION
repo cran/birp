@@ -2,8 +2,8 @@ Package: birp
 Type: Package
 Title: Testing for Population Trends Using Low-Cost Ecological Count
         Data
-Version: 0.9.2
-Date: 2026-11-09
+Version: 0.9.3
+Date: 2026-11-16
 Authors@R: c(person("Madleina", "Caduff", role = c("aut"),
                      email = "madleina.caduff@unifr.ch"),
              person("Andreas", "Füglistaler", role = c("aut", "cre"),
@@ -35,7 +35,7 @@ Suggests: knitr, rmarkdown
 VignetteBuilder: knitr
 Config/roxygen2/version: 8.0.0
 NeedsCompilation: yes
-Packaged: 2026-11-09 13:53:37 UTC; andreas
+Packaged: 2026-11-17 08:29:09 UTC; andreas
 Author: Madleina Caduff [aut],
   Andreas Füglistaler [aut, cre],
   Daniel Wegmann [aut],
@@ -49,4 +49,4 @@ Author: Madleina Caduff [aut],
   Fons Rademakers [cph] (Author of FindR.cmake (CERN ROOT))
 Maintainer: Andreas Füglistaler <andreas.fueglistaler@unifr.ch>
 Repository: CRAN
-Date/Publication: 2026-11-09 15:20:03 UTC
+Date/Publication: 2026-11-17 11:40:15 UTC

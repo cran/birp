@@ -1,12 +1,12 @@
-88021356b7e248da69bffed5e1be0a07 *DESCRIPTION
+dc05f2d520f4552f76bf81cdfaaefc2c *DESCRIPTION
 851284dded9d91bcb9195b2fa72374ed *NAMESPACE
-55714e72add6e2b97110196dcd87a830 *NEWS.md
+7b6f2bf61b070bfdef6671f371a9ba47 *NEWS.md
 391379180a92c4e741030c84fd115c92 *R/RcppExports.R
 aa4d2018d50d1c1011d04861c7586c9b *R/birp-package.R
 ee42a44bab35cb8e3d7433ef18558ae2 *R/birp.R
 c18ca18cfec7739173c616a1ac6bd6e8 *R/birp_data.R
 bf2d648d33772bdc8c4f164c1bd6edf1 *README
-95a124bf59d9d853ca830fc4caca49a8 *build/partial.rdb
+a3b27c10373c98a99feedbd116549f37 *build/partial.rdb
 8e0db6497b8b4cbd550378865b762667 *build/vignette.rds
 642418da5717a0ca065455c1670606ae *cleanup
 642418da5717a0ca065455c1670606ae *cleanup.win
@@ -16,7 +16,7 @@ b943c9b8148c7aa607453c57dbf3bbba *inst/AUTHORS
 d64bac229424484456bf7e84ed58765b *inst/COPYRIGHTS
 91efb58bca2467e2b43628c3ac298993 *inst/doc/birp-introduction.R
 afdd0816d088cbd662190aa10a3a1b19 *inst/doc/birp-introduction.Rmd
-dc48eeece0585855486cfaec5b88f3e5 *inst/doc/birp-introduction.html
+4e3af93a4fb51863c1f5c8c0fdce5a3b *inst/doc/birp-introduction.html
 dc110a9c81bd83d7f63c41b6d1b1d999 *inst/extdata/birp_BACI_gamma_configuration.txt
 977c84137fa777cfe51730a7808b19ec *inst/extdata/birp_CI_groups.txt
 3e475aee0953aa1be6940ef67947d292 *inst/extdata/birp_DeltaSummaries.txt
@@ -73,7 +73,7 @@ e90d3bea12a6a25227a17c2f5a3d844e *man/summary.birp.Rd
 95715e6d47f973aada1794142c544828 *man/summary.birp_data.Rd
 32d9886a205283ce1250148866dbb8dc *src/Makevars.in
 496fbdff50c14b57a38300e9bfdee113 *src/RcppExports.cpp
-bcbf68c3820fc9f686d86e9173b3b864 *src/birp_cpp/CMakeLists.txt
+8dfa51e6bb23667374d1473a19ce7578 *src/birp_cpp/CMakeLists.txt
 dccfe79e8b0d63892571b40d85152c59 *src/birp_cpp/arma.libs
 723f507bc2bea2862f4015e375af8cae *src/birp_cpp/core/BirpDAG.h
 f1aba73d50f84e68855f68bbce2f3b62 *src/birp_cpp/core/BirpTypes.h
